@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sequence name="MVI_20011">
+   <sequence_attribute camera_state="unstable" sence_weather="sunny"/>
+   <ignored_region>
+      <box left="778.75" top="24.75" width="181.75" height="63.5"/>
+      <box left="930.75" top="94.75" width="29.75" height="33.5"/>
+      <box left="523.75" top="13.75" width="178.5" height="37.5"/>
+      <box left="207.75" top="34.75" width="270.5" height="94.5"/>
+      <box left="182.75" top="131.75" width="145.5" height="117.5"/>
+      <box left="0.5" top="231.75" width="88.75" height="121.5"/>
+      <box left="123.75" top="151.75" width="57.5" height="97.5"/>
+   </ignored_region>
+   <frame density="7" num="1">
+      <target_list>
+         <target id="1">
+            <box left="592.75" top="378.8" width="160.05" height="162.2"/>
+            <attribute orientation="18.488" speed="6.859" trajectory_length="5" truncation_ratio="0.1" vehicle_type="car"/>
+         </target>
+         <target id="2">
+            <box left="557.65" top="120.98" width="47.2" height="43.06"/>
+            <attribute orientation="19.398" speed="1.5055" trajectory_length="72" truncation_ratio="0" vehicle_type="car"/>
+         </target>
+      </target_list>
+   </frame>
+   <frame density="7" num="2">
+      <target_list>
+         <target id="1">
+            <box left="594.2" top="391.81" width="161.5" height="149.19"/>
+            <attribute orientation="18.488" speed="6.859" trajectory_length="5" truncation_ratio="0.2" vehicle_type="car"/>
+         </target>
+         <target id="2">
+            <box left="557.7" top="121.87" width="48.1" height="44.12"/>
+            <attribute orientation="19.398" speed="1.5055" trajectory_length="72" truncation_ratio="0" vehicle_type="car"/>
+         </target>
+         <target id="3">
+            <box left="545" top="88.53" width="35.7" height="30.6"/>
+            <attribute orientation="2.7525" speed="0.5206" trajectory_length="105" truncation_ratio="0" vehicle_type="car"/>
+            <occlusion>
+               <region_overlap left="553.35" top="88.53" width="27.35" height="1.69" occlusion_id="5" occlusion_status="1"/>
+            </occlusion>
+         </target>
+      </target_list>
+   </frame>
+</sequence>

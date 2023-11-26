@@ -1,0 +1,22 @@
+[run]
+omit = 
+    evadb/udfs/abstract/*
+    evadb/udfs/emotion_detector.py
+    evadb/udfs/yolo_object_detector.py
+    evadb/executor/exchange_executor.py
+    evadb/executor/ray_utils.py
+
+[report]
+exclude_lines =
+    # pragma: no cover
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING
+
+    # Ray Execution
+    if ray_enabled:
+    class LogicalExchangeToPhysical(Rule):
+    class LogicalExchange(Operator):
+
+    # Do not complain if tests do not hit error reporting code:
+    except
+    raise

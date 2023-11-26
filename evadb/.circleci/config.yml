@@ -1,0 +1,546 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.2.0
+  macos: circleci/macos@2.3.4
+
+workflows:
+  main:
+    jobs:
+        ################################
+        ## LINTER: All
+        ################################
+        ################################
+        - Linux:
+            name: Linter | v3.10 | Linux
+            mode: LINTER
+        ################################
+        ## DOC: All
+        ################################
+        ################################
+        - Doc:
+            name: Doc | v3.10 | Linux
+        ################################
+        #### PIP: Master
+        ################################
+        ################################
+        - Pip-PyPI:
+            filters:
+              branches:
+                only: master
+        - Pip-Local:
+            filters:
+              branches:
+                only: master
+        ################################
+        #### UNIT TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Unit Test | v3.10 | Linux
+            mode: UNIT
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+        ################################
+        #### SHORT INTEGRATION TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Integration Test | v3.10 | Linux
+            mode: SHORT INTEGRATION
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+        ################################
+        #### LONG INTEGRATION TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test (Cache) | v3.10 | Linux
+            mode: LONG INTEGRATION CACHE
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+        ################################
+        #### SHORT THIRDPARTY TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Third Party Test | v3.10 | Linux
+            mode: SHORT THIRDPARTY TEST
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+
+        ################################
+        #### LONG INTEGRATION TESTS:
+        #### Staging
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test | v<< matrix.v >> | Linux
+            mode: LONG INTEGRATION
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10", "3.11"]
+            filters:
+              branches:
+                only:
+                  - staging
+        ################################
+        #### LONG INTEGRATION TESTS + RAY:
+        #### Staging, Master
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test | Ray | v<< matrix.v >> | Linux
+            mode: LONG INTEGRATION
+            ray: ENABLED
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10"]
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+        ################################
+        ### THIRD PARTY: Staging, Master
+        ################################
+        ################################
+        - Postgres:
+            name: Third Party Test - Postgres | v3.10 | Linux
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+        ################################
+        ### THIRD PARTY: Staging, Master
+        ################################
+        ################################
+        - MySQL:
+            name: Third Party Test - MySQL | v3.10 | Linux
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+        ################################
+        ### NOTEBOOKS: Staging, Master
+        ################################
+        ################################
+        - Linux:
+            name: Notebook Test | v<< matrix.v >> | Linux
+            mode: NOTEBOOK
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10", "3.11"]
+        ################################
+        #### FULL TESTS:
+        #### Master 
+        ################################
+        ################################
+        - Linux:
+            name: Full Test | v<< matrix.v >> | Linux
+            mode: FULL
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10", "3.11"]
+            filters:
+              branches:
+                only: master 
+        ################################
+        # DOCKER AND CLOUD: Master
+        ################################
+        ################################
+        # - Docker-Local
+        # - AWS
+        ################################
+        # OTHER OPERATING SYSTEMS
+        ################################
+        ################################
+        #- Windows:
+        #    name: "Windows | v3.10"
+        #- MacOS:
+        #    name: FULL TEST | v<< matrix.v >> | MacOS
+        #    mode: FULL
+        #    matrix:
+        #      parameters:
+        #        v: ["3.10"]
+
+jobs:
+  Linux:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+      mode:
+        type: string
+        default: "FULL"
+      ray:
+        type: string
+        default: "DISABLED"
+    resource_class: large
+    docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants
+      - image: "cimg/python:<< parameters.v >>"
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
+
+      # Restore model
+      - restore_cache:
+          keys:
+            - v1-model_cache-{{ checksum "setup.py" }}
+
+      # First try restoring the testmondata from PR, than staging.
+      - restore_cache:
+          keys:
+            - v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-
+            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}-
+      
+      - run:
+          name: Install EvaDB package from GitHub repo with all dependencies
+          environment:
+            PY_VERSION: << parameters.v >>
+            RAY: << parameters.ray >>
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb
+            source test_evadb/bin/activate
+            pip install --upgrade pip
+            if [ $RAY = "ENABLED" ]; then
+              if [ $PY_VERSION != "3.11" ]; then
+                pip install ".[dev,ray,qdrant,pinecone,chromadb]"
+              else
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+              fi
+              python -c "import evadb;cur=evadb.connect().cursor();cur.query('SET ray=True;')"
+            else
+              if [ $PY_VERSION != "3.11" ]; then
+                pip install ".[dev,ludwig,qdrant,pinecone,chromadb]"
+              else
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+              fi
+            fi
+
+      - run:
+          name: Test and upload coverage report to coveralls
+          no_output_timeout: 30m # 30 minute timeout
+          environment:
+            PY_VERSION: << parameters.v >>
+          command: |
+            source test_evadb/bin/activate
+            # https://github.com/pypa/setuptools/issues/3297#issuecomment-1113850079
+            if [[ $PY_VERSION = "3.10" ]] || [[ $PY_VERSION = "3.11" ]]; then
+              export SETUPTOOLS_USE_DISTUTILS=stdlib
+            fi
+            set +e # To make sure the later cache step is not skipped.
+            bash script/test/test.sh -m "<< parameters.mode >>"
+
+      # Enable cache save conditionally (to avoid empty cache in Notebooks)
+      - when:
+          condition: 
+            equal: [ FULL, << parameters.mode >> ]
+          steps:
+            - save_cache:
+                key: v1-model_cache-{{ checksum "setup.py" }}
+                paths:
+                  - /home/circleci/.cache/huggingface/
+                  - /home/circleci/.cache/torch/
+                  - /home/circleci/.cache/gpt4all/
+
+    # Collect the testmondata only for long intergration tests
+      - when:
+          condition:
+            or:
+              - equal: [ LONG INTEGRATION CACHE, << parameters.mode >> ]
+              - and:
+                - equal: [ LONG INTEGRATION, << parameters.mode >> ]
+                - equal: [ staging, << pipeline.git.branch >> ]
+                - equal: [ "3.10", << parameters.v >> ]
+                - equal: [ DISABLED, << parameters.ray >>]
+          steps:
+          - save_cache:
+              key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-{{ epoch }}
+              paths:
+                - .testmondata
+                - .testmondata-shm
+                - .testmondata-wal
+
+
+      - save_cache:
+          key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
+          paths:
+            - test_evadb
+
+  Doc:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+      mode:
+        type: string
+        default: "DOC"
+    resource_class: large
+    docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants
+      - image: "cimg/python:<< parameters.v >>-node"
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}-{{ checksum "package-lock.json" }}
+
+      - run:
+          name: Install EvaDB Doc dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb_doc
+            source test_evadb_doc/bin/activate
+            pip install --upgrade pip
+            pip install -r docs/requirements.txt 
+            npm install markdown-link-check
+
+      - run:
+          name: Test doc build and link validation
+          no_output_timeout: 10m # 10 minute timeout
+          command: |
+            source test_evadb_doc/bin/activate
+            bash script/test/test.sh -m "<< parameters.mode >>"
+
+      - save_cache:
+          key: v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}-{{ checksum "package-lock.json" }}
+          paths:
+            - test_evadb_doc
+            - node_modules
+
+  MySQL:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+    resource_class: large
+    docker:
+      - image: "cimg/python:<< parameters.v >>"
+      - image: "cimg/mysql:8.0"
+        environment:
+          MYSQL_USER: eva
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: evadb
+
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-rayDISABLED-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          keys:
+            - v1-model_cache-{{ checksum "setup.py" }}
+
+      - run:
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+
+      - run:
+          name: Wait for DB to run
+          command : dockerize -wait tcp://localhost:3306 -timeout 1m
+
+      - run:
+          name: Install EvaDB package from GitHub repo with all dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb
+            pip install --upgrade pip
+            source test_evadb/bin/activate
+            pip install ".[dev]"
+            pip install -r evadb/third_party/databases/mysql/requirements.txt
+
+      - run:
+          name: Run integration tests
+          command: |
+             source test_evadb/bin/activate
+             PYTHONPATH="." python -m pytest test/third_party_tests/test_native_executor.py -k test_should_run_query_in_mysql
+
+  Postgres:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+    resource_class: large
+    docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants  DATABASE_URL: postgresql://postgres:password@localhost:5432/evadb
+      - image: "cimg/python:<< parameters.v >>"
+      - image: "cimg/postgres:14.8"
+        environment:
+          POSTGRES_USER: eva
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: evadb
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-rayDISABLED-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          keys:
+            - v1-model_cache-{{ checksum "setup.py" }}
+
+      - run:
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+
+      - run:
+          name: Wait for DB to run
+          command : dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      - run:
+          name: Install EvaDB package from GitHub repo with all dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb
+            pip install --upgrade pip
+            source test_evadb/bin/activate
+            pip install ".[dev]"
+            pip install -r evadb/third_party/databases/postgres/requirements.txt
+
+      - run:
+          name: Run integration tests
+          command: |
+             source test_evadb/bin/activate
+             PYTHONPATH="." python -m pytest test/third_party_tests/test_native_executor.py -k test_should_run_query_in_postgres
+
+  Windows:
+      executor: win/default
+      steps:
+        - checkout
+        - run: 
+            name: Install EvaDB package from GitHub repo and run tests
+            command: |
+              choco install python --version=3.10.8 -y
+              python --version
+              pip --version
+              pip install virtualenv
+              virtualenv test_evadb
+              test_evadb\Scripts\activate
+              pip install ".[dev]"
+              bash script\test\test.sh
+
+  MacOS:
+      parameters:
+        v:
+          type: string
+          default: "3.10"
+        mode:
+          type: string
+          default: "FULL"
+      macos:
+        xcode: "14.2.0"
+      steps:
+        - run:           
+            name: Setup Python
+            command: |
+              brew update
+              brew install pyenv git
+              pyenv install "<< parameters.v >>"
+              pyenv global "<< parameters.v >>"
+              eval "$(pyenv init -)"
+              python --version
+              pip --version
+        - checkout
+        - run:           
+            name: Install EvaDB package from GitHub repo and run tests
+            no_output_timeout: 30m # 30 minute timeout
+            command: |
+              python -m venv test_evadb
+              source test_evadb/bin/activate
+              pip install --upgrade pip
+              pip debug --verbose
+              pip install ".[dev,ludwig,qdrant,forecasting,pinecone,chromadb]"
+              source test_evadb/bin/activate
+              bash script/test/test.sh -m "<< parameters.mode >>"
+
+  Pip-PyPI:
+    resource_class: large
+    docker:
+      - image: "cimg/python:3.10"
+    steps:
+      - checkout
+      - run:
+          name: Install EvaDB package from PIP and start server
+          command: |
+            pip install --upgrade pip
+            pip install evadb
+            bash script/test/package.sh
+
+  Pip-Local:
+    resource_class: large
+    docker:
+      - image: "cimg/python:3.10"
+    steps:
+      - checkout
+      - run:
+          name: Install EvaDB package locally and start server
+          command: |
+            pip install --upgrade pip
+            pip cache purge
+            pip install "."
+            bash script/test/package.sh
+
+  Docker-Local:
+    resource_class: large
+    docker:
+      - image: cimg/base:2023.05
+
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Build EvaDB Docker image and start server
+          command: |
+            docker build -t evadb docker
+            timeout 30 docker run evadb || true
+
+  AWS:
+    resource_class: large
+    docker:
+      - image: cimg/aws:2023.05
+
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Pull EvaDB Docker image and start server
+          command: |
+            aws --version
+            docker pull evadbai/evaserver
+            timeout 30 docker run evadbai/evaserver || true

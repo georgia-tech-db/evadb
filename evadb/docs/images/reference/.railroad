@@ -1,0 +1,42 @@
+
+selectStatement
+    ::= 'SELECT' ((columnName| functionCall) ('AS' columnAlias)?   ) (',' (columnName| functionCall) ('AS' columnAlias)?  )*
+      fromClause ('WHERE' expression)? orderByClause? limitClause?
+
+
+fromClause
+::= 'FROM'  (tableName | '(' selectStatement ')' ) ('AS' alias)? ('SAMPLE' decimal)?
+        (
+        (('JOIN' (tableName | '(' selectStatement ')') ('AS' alias)? ('SAMPLE' decimal)?)  | ('LATERAL' functionCall )  ('AS' alias)? ('SAMPLE' decimal)? )
+        (
+        ON (columnName '=' otherColumnName ) ( 'AND' columnName '=' otherColumnName )*
+      )?
+
+        )*
+
+
+createTable
+    ::= 'CREATE' 'TABLE'
+      ('IF' 'NOT' 'EXISTS')?
+      tableName '(' columnName dataType (',' columnName dataType)* ')'
+
+
+createMaterializedView
+    ::= 'CREATE' 'MATERIALIZED' 'VIEW'
+      ('IF' 'NOT' 'EXISTS')?
+      tableName '(' columnName (',' columnName)* ')'
+      'AS'
+      selectStatement
+
+
+createUdf
+    ::= 'CREATE' 'UDF'
+      ('IF' 'NOT' 'EXISTS')?
+      udfName
+      'INPUT'  '(' udfInput dataType (',' udfInput dataType)* ')'
+      'OUTPUT' '(' udfOutput dataType (',' udfOutput dataType)* ')'
+      'TYPE'   udfType
+      'IMPL'   udfImpl
+
+selectElement
+    ::= (columnName| functionCall) ('AS' columnAlias)?

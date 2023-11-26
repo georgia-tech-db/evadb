@@ -1,0 +1,22 @@
+name: ❓ Question
+description: Ask a question on EvaDB
+labels: [question]
+body:
+  - type: checkboxes
+    attributes:
+      label: Search before asking
+      description: >
+        🔍 Please search our [issues](https://github.com/georgia-tech-db/eva/issues) to see if a similar question already exists.
+      options:
+        - label: >
+            I have searched the EvaDB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar questions.
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Question
+      description: ❓ What is your question?
+      placeholder: |
+        💡 ProTip! Include as much information as possible (screenshots, logs, tracebacks etc.) to receive the most helpful response.
+    validations:
+      required: true
