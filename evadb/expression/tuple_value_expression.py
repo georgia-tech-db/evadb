@@ -34,7 +34,7 @@ class TupleValueExpression(AbstractExpression):
         col_alias=None,
     ):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
-        self._name = name.lower()
+        self._name = name
         self._table_alias = table_alias
         self._col_object = col_object
         self._col_alias = col_alias
