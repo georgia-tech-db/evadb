@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#import sys 
-#import subprocess
+
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query_fetch_all
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
+
 
 DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
@@ -310,11 +310,6 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:
-            #Uncomment to force pip installs onto local device
-            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'norfair'])
-            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'ultralytics'])
-            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'facenet-pytorch'])
-            #cursor.query("DROP FUNCTION IF EXISTS NorFairTracker;").df()
             execute_query_fetch_all(
                 db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
             )
