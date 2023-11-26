@@ -38,6 +38,8 @@ class ShowStatement(AbstractStatement):
         show_str = ""
         if self.show_type == ShowType.FUNCTIONS:
             show_str = "FUNCTIONS"
+        elif self.show_type == ShowType.FUNCTIONS_ALL:
+            show_str = "FUNCTIONS_ALL"
         elif self.show_type == ShowType.TABLES:
             show_str = "TABLES"
         elif self.show_type == ShowType.CONFIGS:

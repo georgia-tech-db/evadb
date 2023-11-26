@@ -897,7 +897,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         except FunctionIODefinitionError as e:
             err_msg = (
-                f"Error creating function, input/output definition incorrect: {str(e)}"
+                f"Error creating function ({function}), input/output definition incorrect: {str(e)}"
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)

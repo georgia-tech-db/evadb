@@ -197,7 +197,7 @@ describe_statement: DESCRIBE table_name
     
 help_statement: HELP STRING_LITERAL
     
-show_statement: SHOW (FUNCTIONS | TABLES | uid | DATABASES)
+show_statement: SHOW (FUNCTIONS | FUNCTIONS_ALL | TABLES | uid | DATABASES)
 
 explain_statement: EXPLAIN explainable_statement
 
@@ -421,6 +421,7 @@ TABLES:                              "TABLES"i
 TO:                                  "TO"i
 TRUE:                                "TRUE"i
 FUNCTIONS:                           "FUNCTIONS"i
+FUNCTIONS_ALL:                       "FUNCTIONS_ALL"i
 UNION:                               "UNION"i
 UNIQUE:                              "UNIQUE"i
 UNKNOWN:                             "UNKNOWN"i

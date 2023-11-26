@@ -40,6 +40,10 @@ class ShowInfoExecutor(AbstractExecutor):
             functions = self.catalog().get_all_function_catalog_entries()
             for function in functions:
                 show_entries.append(function.display_format())
+        elif self.node.show_type is ShowType.FUNCTIONS_ALL:
+            functions = self.catalog().get_all_function_catalog_entries()
+            for function in functions:
+                show_entries.append(function.display_format_with_metadata())
         elif self.node.show_type is ShowType.TABLES:
             tables = self.catalog().get_all_table_catalog_entries()
             for table in tables:

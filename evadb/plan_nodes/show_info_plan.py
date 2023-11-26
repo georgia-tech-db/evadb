@@ -34,7 +34,7 @@ class ShowInfoPlan(AbstractPlan):
         return self._show_val
 
     def __str__(self):
-        if self._show_type == ShowType.FUNCTIONS:
+        if self._show_type == ShowType.FUNCTIONS or self._show_type == ShowType.FUNCTIONS_ALL:
             return "ShowFunctionPlan"
         if self._show_type == ShowType.DATABASES:
             return "ShowDatabasePlan"

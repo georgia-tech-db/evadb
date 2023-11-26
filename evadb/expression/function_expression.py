@@ -124,6 +124,17 @@ class FunctionExpression(AbstractExpression):
         func = self._gpu_enabled_function()
         # record the time taken for the function execution
         # note the function might be using cache
+        # Verify that the batch has all the required columns
+        actual_cols = set([col.split(".")[-1] for col in batch.columns])
+        for expected_col in self.function_obj.args:
+            #TODO: Figure out why required is not copying over correctly
+            # if not expected_col.required:
+                # continue
+        
+            assert (
+                expected_col.name in actual_cols
+            ), f"Column '{expected_col.name}' not found in batch with columns {actual_cols}"
+
         with self._stats.timer:
             # apply the function and project the required columns
             outcomes = self._apply_function_expression(func, batch, **kwargs)
