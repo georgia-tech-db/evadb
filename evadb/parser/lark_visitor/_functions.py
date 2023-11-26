@@ -134,11 +134,14 @@ class Functions:
             agg_func_type = ExpressionType.AGGREGATION_LAST
         elif agg_func_name == "SEGMENT":
             agg_func_type = ExpressionType.AGGREGATION_SEGMENT
+        elif agg_func_name == "STRING_AGG":
+            agg_func_type = ExpressionType.AGGREGATION_STRING_AGG
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):
         agg_func_arg = None
         agg_func_name = None
+        agg_func_args = []
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -155,6 +158,13 @@ class Functions:
                     agg_func_arg = TupleValueExpression(name="_row_id")
                 else:
                     agg_func_arg = TupleValueExpression(name="id")
+
+        if agg_func_name == "STRING_AGG":
+            if len(agg_func_args) != 2:
+                raise ValueError("String Agg requires exactly two arguments")
+            agg_func_type = self.get_aggregate_function_type(agg_func_name)
+            agg_expr = AggregationExpression(agg_func_type, None, *agg_func_args)
+            return agg_expr
 
         agg_func_type = self.get_aggregate_function_type(agg_func_name)
         agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)

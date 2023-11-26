@@ -54,6 +54,12 @@ class AggregationExpression(AbstractExpression):
             batch.aggregate("min")
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
+        elif self.etype == ExpressionType.AGGREGATION_STRING_AGG:
+            # Assuming two children: the column and the delimiter
+            column_to_aggregate = self.get_child(0).evaluate(*args, **kwargs)
+            delimiter = kwargs.get('delimiter')
+            batch.aggregate_string_aggregation(column_to_aggregate, delimiter)
+
         batch.reset_index()
 
         column_name = self.etype.name

@@ -297,6 +297,7 @@ or_replace: OR REPLACE
 
 function_call: function         ->function_call           
     | aggregate_windowed_function   ->aggregate_function_call
+    | string_agg_function
 
 function: simple_id "(" (STAR | function_args)? ")" dotted_id?
     
@@ -305,6 +306,9 @@ aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
     
 
 aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT
+
+string_agg_function: "STRING_AGG" LR_BRACKET expression COMMA string_literal RR_BRACKET
+
 
 function_args: (function_arg) ("," function_arg)*
     
