@@ -65,6 +65,7 @@ class CreateFunctionStatement(AbstractStatement):
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
+
         if impl_path:
             if len(str(impl_path)) < 12:
                 self._impl_path = Path(impl_path)
