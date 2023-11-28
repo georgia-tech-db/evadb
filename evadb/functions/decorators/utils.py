@@ -18,6 +18,40 @@ from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.functions.abstract.abstract_function import AbstractFunction
 
 
+def missing_io_signature_helper() -> str:
+    """Helper function to print the error message when the input/output signature is missing
+
+    Args:
+        io_type (str, optional): "input" or "output". Defaults to "input".
+
+    Returns:
+        str: Error message
+    """
+    signature_template = """
+    You can define the io signature using the decorator as follows:
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=[<List of cols>],
+                column_types=[<List of col types>],
+                column_shapes=[<List of col shapes>],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=[<List of cols>],
+                column_types=[<List of col types>],
+                column_shapes=[<List of col shapes>],
+            )
+        ],
+    )
+    More information on the how to create the forward decorator can be found here:
+    https://evadb.readthedocs.io/en/stable/source/reference/ai/custom-ai-function.html#part-1-writing-a-custom-function
+    """
+
+    return signature_template
+
+
 def load_io_from_function_decorators(
     function: Type[AbstractFunction], is_input=False
 ) -> List[Type[FunctionIOCatalogEntry]]:
@@ -45,7 +79,7 @@ def load_io_from_function_decorators(
 
     assert (
         io_signature is not None
-    ), f"Cannot infer io signature from the decorator for {function}."
+    ), f"Cannot infer {tag_key} signature from the decorator for {function}.\n {missing_io_signature_helper()}"
 
     result_list = []
     for io in io_signature:
