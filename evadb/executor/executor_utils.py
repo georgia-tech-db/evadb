@@ -185,6 +185,17 @@ def handle_vector_store_params(
             ),
             "PINECONE_ENV": catalog().get_configuration_catalog_value("PINECONE_ENV"),
         }
+    elif vector_store_type == VectorStoreType.WEAVIATE:
+        # Weaviate Configuration
+        # Weaviate API key and URL Can be obtained from cluster details on Weaviate Cloud Services (WCS) dashboard
+        return {
+            "WEAVIATE_API_KEY": catalog().get_configuration_catalog_value(
+                "WEAVIATE_API_KEY"
+            ),
+            "WEAVIATE_API_URL": catalog().get_configuration_catalog_value(
+                "WEAVIATE_API_URL"
+            ),
+        }
     elif vector_store_type == VectorStoreType.MILVUS:
         return {
             "MILVUS_URI": catalog().get_configuration_catalog_value("MILVUS_URI"),

@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import unittest
+from pathlib import Path
 from test.markers import windows_skip_marker
 
 from evadb.configuration.constants import EvaDB_DATASET_DIR
@@ -50,17 +51,27 @@ class ModulePathTest(unittest.TestCase):
         assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_raise_on_missing_file(self):
-        with self.assertRaises(RuntimeError):
+        # Asserting on the error message, but that's brittle
+        with self.assertRaises(FileNotFoundError):
             load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
 
+    def test_should_raise_on_empty_file(self):
+        # Asserting on the error message, but that's brittle
+        Path("/tmp/empty_file.py").touch()
+        with self.assertRaises(ImportError):
+            load_function_class_from_file("/tmp/empty_file.py")
+
+        # Cleanup
+        Path("/tmp/empty_file.py").unlink()
+
     def test_should_raise_if_class_does_not_exists(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ImportError):
             # evadb/utils/s3_utils.py has no class in it
             # if this test fails due to change in s3_utils.py, change the file to something else
             load_function_class_from_file("evadb/utils/s3_utils.py")
 
     def test_should_raise_if_multiple_classes_exist_and_no_class_mentioned(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ImportError):
             # evadb/utils/generic_utils.py has multiple classes in it
             # if this test fails due to change in generic_utils.py, change the file to something else
             load_function_class_from_file("evadb/utils/generic_utils.py")

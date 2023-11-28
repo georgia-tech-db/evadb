@@ -112,7 +112,7 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             if string_comparison_case_insensitive(node.name, "CHATGPT"):
                 # if the user didn't provide any API_KEY, check if we have one in the catalog
                 if "OPENAI_API_KEY" not in properties.keys():
-                    OpenAI_key = binder._catalog().get_configuration_catalog_value(
+                    openai_key = binder._catalog().get_configuration_catalog_value(
                         "OPENAI_API_KEY"
                     )
                     properties["openai_api_key"] = openai_key
