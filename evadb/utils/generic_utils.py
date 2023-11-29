@@ -512,6 +512,14 @@ def try_to_import_pytesseract():
             """Could not import pytesseract python package.
             Please install it with pip install pytesseract"""
         )
+    
+def is_pytessseract_available():
+    try:
+        try_to_import_pytesseract()
+        return True
+    except ValueError:
+        return False
+
 
 
 ##############################
