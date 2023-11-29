@@ -76,7 +76,5 @@ class InsertExecutor(AbstractExecutor):
                 execute_query_fetch_all(self.db, create_index_query)
 
         yield Batch(
-            pd.DataFrame(
-                [f"Number of rows loaded: {str(len(tuples_to_insert))}"]
-            )
+            pd.DataFrame([f"Number of rows loaded: {str(len(tuples_to_insert))}"])
         )
