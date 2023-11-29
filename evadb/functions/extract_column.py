@@ -13,21 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-from io import BytesIO
-
-import numpy as np
 import pandas as pd
-import json
-from retry import retry
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.functions.abstract.abstract_function import AbstractFunction
+from evadb.functions.chatgpt import ChatGPT
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
-from evadb.functions.chatgpt import ChatGPT
-from evadb.utils.generic_utils import try_to_import_openai
-from evadb.utils.logging_manager import logger
 
 
 class ExtractColumnFunction(ChatGPT):
@@ -36,22 +27,14 @@ class ExtractColumnFunction(ChatGPT):
         return "EXTRACT_COLUMN"
 
     def setup(
-        self, 
-        model="gpt-3.5-turbo",
-        temperature: float = 0,
-        openai_api_key=""
+        self, model="gpt-3.5-turbo", temperature: float = 0, openai_api_key=""
     ) -> None:
         super(ExtractColumnFunction, self).setup(model, temperature, openai_api_key)
 
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=[
-                    "field_name"
-                    "description",
-                    "data_type",
-                    "input_rows"
-                ],
+                columns=["field_name" "description", "data_type", "input_rows"],
                 column_types=[
                     NdArrayType.STR,
                     NdArrayType.STR,
@@ -79,7 +62,7 @@ class ExtractColumnFunction(ChatGPT):
     def forward(self, unstructured_df):
         """
         NOTE (QUESTION) : Can we structure the inputs and outputs better
-        The circumvent issues surrounding the input being only one pandas dataframe and output columns being predefined 
+        The circumvent issues surrounding the input being only one pandas dataframe and output columns being predefined
         Will add all column types as a JSON and parse in the forward function
         Provide only the file name from which the input will be read
         Output in JSON which can be serialized and stored in the results column of the DF
@@ -94,13 +77,13 @@ class ExtractColumnFunction(ChatGPT):
         """
         content = """
             Extract the following fields from the unstructured text below:
-            
             Format of the field is given in the format
             Field Name: Field Description: Field Type
             {}: {}: {}
-
             The unstructured text is as follows:
-        """.format(field_name, description, data_type)
+        """.format(
+            field_name, description, data_type
+        )
 
         print(prompt)
         print(content)
@@ -109,7 +92,9 @@ class ExtractColumnFunction(ChatGPT):
 
         for row in input_rows:
             query = row
-            input_df = pd.DataFrame({"query": [query],"content": content, "prompt": prompt})
+            input_df = pd.DataFrame(
+                {"query": [query], "content": content, "prompt": prompt}
+            )
             print(query)
             df = super(ExtractColumnFunction, self).forward(input_df)
             output_df = pd.concat([output_df, df], ignore_index=True)
