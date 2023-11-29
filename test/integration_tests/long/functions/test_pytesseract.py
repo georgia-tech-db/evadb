@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 from test.util import get_evadb_for_testing
+from test.markers import pytesseract_skip_marker
 
 from evadb.server.command_handler import execute_query_fetch_all
 
@@ -30,7 +31,7 @@ class PytesseractTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyImage;")
 
-    @unittest.skip("Needs Pytesseract")
+    @pytesseract_skip_marker
     def test_pytesseract_function(self):
         function_name = "PyTesseractOCRFunction"
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
