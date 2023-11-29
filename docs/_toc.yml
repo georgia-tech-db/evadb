@@ -45,6 +45,7 @@ parts:
           - file: source/reference/evaql/load_csv
           - file: source/reference/evaql/load_image
           - file: source/reference/evaql/load_video
+          - file: source/reference/evaql/load_pdf
           - file: source/reference/evaql/select
           - file: source/reference/evaql/explain
           - file: source/reference/evaql/show_functions
@@ -78,6 +79,7 @@ parts:
           - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
           - file: source/reference/databases/snowflake
+          - file: source/reference/databases/hackernews
 
       - file: source/reference/vector_databases/index
         title: Vector Databases
@@ -88,6 +90,7 @@ parts:
           - file: source/reference/vector_databases/pgvector
           - file: source/reference/vector_databases/pinecone
           - file: source/reference/vector_databases/milvus
+          - file: source/reference/vector_databases/weaviate
 
       - file: source/reference/ai/index
         title: AI Engines

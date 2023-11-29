@@ -10,6 +10,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.9] - 2023-11-19
+
+* PR #1367: v0.3.9 - new release 
+* PR #1368: Migrate ChatGPT function to openai v1.0 
+* PR #1361: Adding changes for Flaml Sklearn integration 
+* PR #1258: Add feedback for forecasting 
+* PR #1364: Fix python3.8 failing testcases due to type hint 
+* PR #1308: Job scheduler implementation 
+* PR #1352: Make Logic Operators Case Insensitve 
+* PR #1342: Add train scores for ludwig in the create function handler. 
+* PR #1067: Verified that issue #1067 is resolved and added documentation for load pdf functionality. 
+* PR #1334: logging an error message for invalid files while loading 
+* PR #1330: [WIP] Improving error handling messages for Custom Functions 
+* PR #1033: feat: third party app support in EVADB 
+* PR #1339: Support semicolon and escaped strings in lark 
+* PR #1337: CREATE INDEX IF NOT EXISTS is broken. 
+* PR #1333: Fix #1333 dependency and CMD in DockerFile 
+* PR #1336: Add test_eva_db to gitignore 
+* PR #1327: Add the validation score and training time for create_function in XGBoost 
+* PR #1322: String Helper functions in EvaDB 
+* PR #1321: REST API Documentation 
+* PR #1323: Added docs for SET and SHOW CONFIG query 
+* PR #1316: Adding colab notebook for XGBoost Regression and Classification 
+* PR #1269: Add Milvus integration for vector create and search 
+* PR #1319: refactor: code refactor 
+* PR #1298: Convert nested join in Vector Queries to Pandas Merge.  
+* PR #1305: Starting the changes for XGBoost classification integration. 
+* PR #1289: SnowFlake Integration for EvaDB 
+* PR #1307: Fix: minor typo 
+* PR #1272: Configuration Manager Redesign 
+* PR #1283: Fix current issues with forecasting 
+* PR #1304: Bump Version to v0.3.9+dev 
+* PR #1303: v0.3.8 - new release 
+
 ##  [0.3.8] - 2023-10-18
 
 * PR #1303: v0.3.8 - new release 

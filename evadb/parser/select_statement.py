@@ -141,7 +141,11 @@ class SelectStatement(AbstractStatement):
                 orderby_list_str += str(expr[0]) + " " + sort_str + ", "
             orderby_list_str = orderby_list_str.rstrip(", ")
 
-        select_str = f"SELECT {target_list_str} FROM {str(self._from_table)}"
+        select_str = f"SELECT {target_list_str}"
+
+        if self._from_table is not None:
+            select_str += " FROM " + str(self._from_table)
+
         if self._where_clause is not None:
             select_str += " WHERE " + str(self._where_clause)
 
