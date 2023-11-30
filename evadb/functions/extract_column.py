@@ -34,7 +34,7 @@ class ExtractColumnFunction(ChatGPT):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["field_name" "description", "data_type", "input_rows"],
+                columns=["field_name", "description", "data_type", "input_rows"],
                 column_types=[
                     NdArrayType.STR,
                     NdArrayType.STR,
@@ -85,9 +85,6 @@ class ExtractColumnFunction(ChatGPT):
             field_name, description, data_type
         )
 
-        print(prompt)
-        print(content)
-
         output_df = pd.DataFrame({"response": []})
 
         for row in input_rows:
@@ -95,7 +92,6 @@ class ExtractColumnFunction(ChatGPT):
             input_df = pd.DataFrame(
                 {"query": [query], "content": content, "prompt": prompt}
             )
-            print(query)
             df = super(ExtractColumnFunction, self).forward(input_df)
             output_df = pd.concat([output_df, df], ignore_index=True)
         return output_df
