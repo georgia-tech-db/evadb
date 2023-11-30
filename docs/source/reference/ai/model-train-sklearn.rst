@@ -24,6 +24,7 @@ To use the `Flaml Sklearn AutoML framework <https://microsoft.github.io/FLAML/do
 
 In the above query, you are creating a new customized function by training a model from the ``HomeRentals`` table using the ``Flaml Sklearn`` framework.
 The ``rental_price`` column will be the target column for predication, while the rest columns from the ``SELECT`` query are the inputs.
+This shall run the ``Random Forest`` model by default.
 
 3. Model Training Parameters
 ----------------------------
@@ -45,7 +46,7 @@ The ``rental_price`` column will be the target column for predication, while the
        use the ``r2`` or ``RMSE`` metrics. For training ``classification`` tasks you could use the ``accuracy`` or ``f1_score`` metrics.
        More information about the model metrics could be found `here <https://microsoft.github.io/FLAML/docs/Use-Cases/Task-Oriented-AutoML#optimization-metric>`_
 
-Below are the example queries specifying the aboe parameters
+Below are the example queries specifying the above parameters
 
 .. code-block:: sql
 
