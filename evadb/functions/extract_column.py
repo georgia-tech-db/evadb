@@ -67,10 +67,12 @@ class ExtractColumnFunction(ChatGPT):
         Provide only the file name from which the input will be read
         Output in JSON which can be serialized and stored in the results column of the DF
         """
-        field_name = unstructured_df.iloc[0, 0]
-        description = unstructured_df.iloc[0, 1]
-        data_type = unstructured_df.iloc[0, 2]
-        input_rows = unstructured_df[unstructured_df.columns[3]]
+        for row in unstructured_df.itertuples():
+            field_name = row[0]
+            description = row[1]
+            data_type = row[2]
+            input_rows = row[3]
+            
         prompt = """
             You are given a user query. Your task is to extract the following fields from the query and return the result in string format.
             IMPORTANT: RETURN ONLY THE EXTRACTED VALUE (one word or phrase). DO NOT RETURN THE FIELD NAME OR ANY OTHER INFORMATION.
