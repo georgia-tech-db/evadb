@@ -24,8 +24,10 @@ from evadb.catalog.catalog_utils import (
     get_metadata_properties,
     get_video_table_column_definitions,
 )
+from evadb.catalog.models.utils import FunctionCatalogEntry
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.executor.execution_context import Context
+from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.types import FunctionType
@@ -55,9 +57,6 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
         and node.children[0].name == "*"
     ):
         node.children = extend_star(binder._binder_context)
-    # bind all the children
-    for child in node.children:
-        binder.bind(child)
 
     function_obj = binder._catalog().get_function_catalog_entry_by_name(node.name)
     if function_obj is None:
@@ -67,6 +66,8 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
         )
         logger.error(err_msg)
         raise BinderError(err_msg)
+
+    handle_function_args(binder, node, function_obj)
 
     if string_comparison_case_insensitive(function_obj.type, "HuggingFace"):
         node.function = assign_hf_function(function_obj)
@@ -142,6 +143,63 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
         node.projection_columns = [obj.name.lower() for obj in output_objs]
 
     resolve_alias_table_value_expression(node)
+
+
+def handle_function_args(
+    binder: StatementBinder,
+    node: FunctionExpression,
+    function_obj: FunctionCatalogEntry,
+):
+    """Parses the function arguments.
+    Reads named arguments and places the value in the absolute position as expected by the function
+    Args:
+        binder (StatementBinder): The binder object used to bind expressions in the statement.
+        node (FunctionExpression): The function expression representing the extract object operation.
+        function_obj (FunctionCatalogEntry): The function catalog object describing the function.
+    Raises:
+        BinderError: For one of the following reasons
+            1) If the number of arguments is greater than expected.
+            2) The argument name doesn't exist in the function definition.
+            3) Position argument follows Named arguments.
+    """
+    if len(function_obj.args) < len(node.children):
+        err_msg = f"Function '{function_obj.name}' takes '{len(function_obj.args)}' arguments, provided: '{len(node.children)}'. "
+        logger.error(err_msg)
+        raise BinderError(err_msg)
+
+    keyword_argument_flag = False
+    for child in node.children:
+        if isinstance(child, ComparisonExpression):
+            keyword_argument_flag = True
+            # The current implementation is a hack to support named arguments
+            # Implementation varies when optional arguments are supported in evadb functions
+            for arg_index, arg in enumerate(function_obj.args):
+                if arg.name == child.children[0].name:
+                    node.children[arg_index] = child.children[1]
+                    break
+            else:
+                err_msg = f"Argument '{child.children[0].name}' does not exist in function '{function_obj.name}'. "
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+            pass
+        else:
+            if keyword_argument_flag:
+                err_msg = "Positional argument should not follow keyword argument."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+
+    # bind all the children
+    for child in node.children:
+        # remove the named args
+        if isinstance(child, ComparisonExpression):
+            node.children.remove(child)
+        else:
+            binder.bind(child)
+
+    if len(function_obj.args) < len(node.children):
+        err_msg = f"Function '{function_obj.name}' takes '{len(function_obj.args)}' arguments, provided: 'len(node.children)'. "
+        logger.error(err_msg)
+        raise BinderError(err_msg)
 
 
 def handle_bind_extract_object_function(
