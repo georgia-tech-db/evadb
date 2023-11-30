@@ -6,7 +6,7 @@ Model Training with Sklearn
 1. Installation
 ---------------
 
-To use the `Flaml XGBoost AutoML framework <https://microsoft.github.io/FLAML/docs/Examples/Integrate%20-%20Scikit-learn%20Pipeline/>`_, we need to install the extra Flaml dependency in your EvaDB virtual environment.
+To use the `Flaml Sklearn AutoML framework <https://microsoft.github.io/FLAML/docs/Examples/Integrate%20-%20Scikit-learn%20Pipeline/>`_, we need to install the extra Flaml dependency in your EvaDB virtual environment.
 
 .. code-block:: bash
 
@@ -19,10 +19,10 @@ To use the `Flaml XGBoost AutoML framework <https://microsoft.github.io/FLAML/do
 
    CREATE FUNCTION IF NOT EXISTS PredictRent FROM
    ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
-   TYPE XGBoost
+   TYPE Sklearn
    PREDICT 'rental_price';
 
-In the above query, you are creating a new customized function by training a model from the ``HomeRentals`` table using the ``Flaml XGBoost`` framework.
+In the above query, you are creating a new customized function by training a model from the ``HomeRentals`` table using the ``Flaml Sklearn`` framework.
 The ``rental_price`` column will be the target column for predication, while the rest columns from the ``SELECT`` query are the inputs.
 
 3. Model Training Parameters
