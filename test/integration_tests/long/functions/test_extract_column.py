@@ -18,8 +18,6 @@ import unittest
 from test.markers import chatgpt_skip_marker
 from test.util import get_evadb_for_testing
 
-import pandas as pd
-
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -35,7 +33,9 @@ class ExtractColumnTest(unittest.TestCase):
 
         input_row = "My keyboard has stopped working"
 
-        insert_query = f"""INSERT INTO InputUnstructured (input_rows) VALUES ("{input_row}")"""
+        insert_query = (
+            f"""INSERT INTO InputUnstructured (input_rows) VALUES ("{input_row}")"""
+        )
         execute_query_fetch_all(self.evadb, insert_query)
         # Add actual API key here
         os.environ["OPENAI_API_KEY"] = "sk-..."

@@ -72,7 +72,7 @@ class ExtractColumnFunction(ChatGPT):
             description = row[1]
             data_type = row[2]
             input_rows = row[3]
-            
+
         prompt = """
             You are given a user query. Your task is to extract the following fields from the query and return the result in string format.
             IMPORTANT: RETURN ONLY THE EXTRACTED VALUE (one word or phrase). DO NOT RETURN THE FIELD NAME OR ANY OTHER INFORMATION.
