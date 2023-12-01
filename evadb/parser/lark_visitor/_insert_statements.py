@@ -39,9 +39,7 @@ class Insert:
                 elif child.data == "uid_list":
                     column_list = self.visit(child)
                 elif child.data == "insert_statement_value":
-                    insrt_value = self.visit(child)
-                    # Support only (value1, value2, .... value n)
-                    value_list = insrt_value[0]
+                    value_list = self.visit(child)
 
         insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
         return insert_stmt

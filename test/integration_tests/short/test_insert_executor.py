@@ -43,9 +43,20 @@ class InsertExecutorTest(unittest.TestCase):
         """
         execute_query_fetch_all(self.evadb, query)
 
+        query = """CREATE TABLE IF NOT EXISTS books
+            (
+                name    TEXT(100),
+                author  TEXT(100),
+                year    INTEGER
+            );
+        """
+        execute_query_fetch_all(self.evadb, query)
+
     def tearDown(self):
         shutdown_ray()
         file_remove("dummy.avi")
+
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS books;")
 
     # integration test
     @unittest.skip("Not supported in current version")
@@ -111,3 +122,98 @@ class InsertExecutorTest(unittest.TestCase):
         query = """SELECT name FROM CSVTable WHERE name LIKE '.*(sad|happy)';"""
         batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(batch._frames), 2)
+
+    def test_insert_one_tuple_in_table(self):
+        query = """
+            INSERT INTO books (name, author, year) VALUES (
+                'Harry Potter', 'JK Rowling', 1997
+            );
+        """
+        execute_query_fetch_all(self.evadb, query)
+        query = "SELECT * FROM books;"
+        batch = execute_query_fetch_all(self.evadb, query)
+        logger.info(batch)
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["books.name"].array,
+                np.array(
+                    [
+                        "Harry Potter",
+                    ]
+                ),
+            )
+        )
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["books.author"].array,
+                np.array(
+                    [
+                        "JK Rowling",
+                    ]
+                ),
+            )
+        )
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["books.year"].array,
+                np.array(
+                    [
+                        1997,
+                    ]
+                ),
+            )
+        )
+
+    def test_insert_multiple_tuples_in_table(self):
+        query = """
+            INSERT INTO books (name, author, year) VALUES
+            ('Fantastic Beasts Collection', 'JK Rowling', 2001),
+            ('Magic Tree House Collection', 'Mary Pope Osborne', 1992),
+            ('Sherlock Holmes', 'Arthur Conan Doyle', 1887);
+        """
+        execute_query_fetch_all(self.evadb, query)
+        query = "SELECT * FROM books;"
+        batch = execute_query_fetch_all(self.evadb, query)
+        logger.info(batch)
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["books.name"].array,
+                np.array(
+                    [
+                        "Fantastic Beasts Collection",
+                        "Magic Tree House Collection",
+                        "Sherlock Holmes",
+                    ]
+                ),
+            )
+        )
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["books.author"].array,
+                np.array(
+                    [
+                        "JK Rowling",
+                        "Mary Pope Osborne",
+                        "Arthur Conan Doyle",
+                    ]
+                ),
+            )
+        )
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["books.year"].array,
+                np.array(
+                    [
+                        2001,
+                        1992,
+                        1887,
+                    ]
+                ),
+            )
+        )

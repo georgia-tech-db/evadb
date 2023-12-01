@@ -827,8 +827,10 @@ class ParserTests(unittest.TestCase):
                 TupleValueExpression("Frame_Path"),
             ],
             [
-                ConstantValueExpression(1),
-                ConstantValueExpression("/mnt/frames/1.png", ColumnType.TEXT),
+                [
+                    ConstantValueExpression(1),
+                    ConstantValueExpression("/mnt/frames/1.png", ColumnType.TEXT),
+                ]
             ],
         )
         evadb_statement_list = parser.parse(insert_query)
