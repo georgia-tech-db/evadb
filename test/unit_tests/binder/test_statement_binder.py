@@ -485,6 +485,11 @@ class StatementBinderTests(unittest.TestCase):
                 type=ColumnType.FLOAT,
                 array_type=None,
             )
+            plot_col_obj = ColumnCatalogEntry(
+                name="plot",
+                type=ColumnType.ANY,
+                array_type=None,
+            )
             create_function_statement.query.target_list = [
                 TupleValueExpression(
                     name=id_col_obj.name, table_alias="a", col_object=id_col_obj
@@ -522,6 +527,7 @@ class StatementBinderTests(unittest.TestCase):
                         y_col_obj,
                         y_lo_col_obj,
                         y_hi_col_obj,
+                        plot_col_obj,
                     )
                 ]
             )
@@ -558,6 +564,11 @@ class StatementBinderTests(unittest.TestCase):
             y_hi_col_obj = ColumnCatalogEntry(
                 name="ma-hi",
                 type=ColumnType.FLOAT,
+                array_type=None,
+            )
+            plot_col_obj = ColumnCatalogEntry(
+                name="plot",
+                type=ColumnType.ANY,
                 array_type=None,
             )
             create_function_statement.query.target_list = [
@@ -601,6 +612,7 @@ class StatementBinderTests(unittest.TestCase):
                         y_col_obj,
                         y_lo_col_obj,
                         y_hi_col_obj,
+                        plot_col_obj,
                     )
                 ]
             )
