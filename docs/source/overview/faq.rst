@@ -34,3 +34,16 @@ If a query runs a complex AI task (e.g., sentiment analysis) on a large table, t
     top
     pgrep evadb_server
 
+Can column names have space?
+----------------------------
+
+For column names with space, you can use reverse quote to contain the column names. Below are example `CREATE TABLE` and `SELECT` queries:
+
+.. code-block:: sql
+
+   CREATE TABLE IF NOT EXISTS MyVideoCSV (
+        id INTEGER UNIQUE,
+        `frame id` INTEGER,
+   );
+
+   SELECT id, `frame id` FROM MyVideoCSV;

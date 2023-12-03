@@ -319,6 +319,37 @@ def create_sample_csv(num_frames=NUM_FRAMES):
     return os.path.join(get_tmp_dir(), "dummy.csv")
 
 
+def create_csv_with_comlumn_name_spaces(num_frames=NUM_FRAMES):
+    try:
+        os.remove(os.path.join(get_tmp_dir(), "dummy.csv"))
+    except FileNotFoundError:
+        pass
+
+    sample_meta = {}
+
+    index = 0
+    sample_labels = ["car", "pedestrian", "bicycle"]
+    num_videos = 2
+    for video_id in range(num_videos):
+        for frame_id in range(num_frames):
+            random_coords = 200 + 300 * np.random.random(4)
+            sample_meta[index] = {
+                "id": index,
+                "frame id": frame_id,
+                "video id": video_id,
+                "dataset name": "test_dataset",
+                "label": sample_labels[np.random.choice(len(sample_labels))],
+                "bbox": ",".join([str(coord) for coord in random_coords]),
+                "object id": np.random.choice(3),
+            }
+
+            index += 1
+
+    df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
+    df_sample_meta.to_csv(os.path.join(get_tmp_dir(), "dummy.csv"), index=False)
+    return os.path.join(get_tmp_dir(), "dummy.csv")
+
+
 def create_dummy_csv_batches(target_columns=None):
     if target_columns:
         df = pd.read_csv(
