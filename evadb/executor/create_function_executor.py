@@ -18,6 +18,7 @@ import locale
 import os
 import pickle
 import re
+import time
 from pathlib import Path
 from typing import Dict, List
 
@@ -30,9 +31,11 @@ from evadb.catalog.models.function_catalog import FunctionCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.configuration.constants import (
+    DEFAULT_SKLEARN_TRAIN_MODEL,
     DEFAULT_TRAIN_REGRESSION_METRIC,
     DEFAULT_TRAIN_TIME_LIMIT,
     DEFAULT_XGBOOST_TASK,
+    SKLEARN_SUPPORTED_MODELS,
     EvaDB_INSTALLATION_DIR,
 )
 from evadb.database import EvaDBDatabase
@@ -45,15 +48,18 @@ from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
+    try_to_import_flaml_automl,
     try_to_import_ludwig,
     try_to_import_neuralforecast,
-    try_to_import_sklearn,
     try_to_import_statsforecast,
     try_to_import_torch,
     try_to_import_ultralytics,
-    try_to_import_xgboost,
 )
 from evadb.utils.logging_manager import logger
+
+
+def root_mean_squared_error(y_true, y_pred):
+    return np.sqrt(np.mean(np.square(y_pred - y_true)))
 
 
 # From https://stackoverflow.com/a/34333710
@@ -127,6 +133,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        start_time = int(time.time())
         auto_train_results = auto_train(
             dataset=aggregated_batch.frames,
             target=arg_map["predict"],
@@ -136,11 +143,13 @@ class CreateFunctionExecutor(AbstractExecutor):
                 "tmp_dir"
             ),
         )
+        train_time = int(time.time()) - start_time
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
         )
         auto_train_results.best_model.save(model_path)
+        best_score = auto_train_results.experiment_analysis.best_result["metric_score"]
         self.node.metadata.append(
             FunctionMetadataCatalogEntry("model_path", model_path)
         )
@@ -153,6 +162,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.function_type,
             io_list,
             self.node.metadata,
+            best_score,
+            train_time,
         )
 
     def handle_sklearn_function(self):
@@ -160,8 +171,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Use Sklearn's regression to train models.
         """
-        try_to_import_sklearn()
-        from sklearn.linear_model import LinearRegression
+        try_to_import_flaml_automl()
 
         assert (
             len(self.children) == 1
@@ -177,10 +187,26 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        model = LinearRegression()
-        Y = aggregated_batch.frames[arg_map["predict"]]
-        aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
-        model.fit(X=aggregated_batch.frames, y=Y)
+        from flaml import AutoML
+
+        model = AutoML()
+        sklearn_model = arg_map.get("model", DEFAULT_SKLEARN_TRAIN_MODEL)
+        if sklearn_model not in SKLEARN_SUPPORTED_MODELS:
+            raise ValueError(
+                f"Sklearn Model {sklearn_model} provided as input is not supported."
+            )
+        settings = {
+            "time_budget": arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
+            "metric": arg_map.get("metric", DEFAULT_TRAIN_REGRESSION_METRIC),
+            "estimator_list": [sklearn_model],
+            "task": arg_map.get("task", DEFAULT_XGBOOST_TASK),
+        }
+        start_time = int(time.time())
+        model.fit(
+            dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
+        )
+        train_time = int(time.time()) - start_time
+        score = model.best_loss
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
@@ -202,6 +228,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.function_type,
             io_list,
             self.node.metadata,
+            score,
+            train_time,
         )
 
     def convert_to_numeric(self, x):
@@ -218,7 +246,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         We use the Flaml AutoML model for training xgboost models.
         """
-        try_to_import_xgboost()
+        try_to_import_flaml_automl()
 
         assert (
             len(self.children) == 1
@@ -243,9 +271,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             "estimator_list": ["xgboost"],
             "task": arg_map.get("task", DEFAULT_XGBOOST_TASK),
         }
+        start_time = int(time.time())
         model.fit(
             dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
         )
+        train_time = int(time.time()) - start_time
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
@@ -262,7 +292,6 @@ class CreateFunctionExecutor(AbstractExecutor):
         impl_path = Path(f"{self.function_dir}/xgboost.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
         best_score = model.best_loss
-        train_time = model.best_config_train_time
         return (
             self.node.name,
             impl_path,
@@ -408,7 +437,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 AutoNHITS,
                 AutoPatchTST,
                 AutoTFT,
-                AutoTimesNet,
             )
 
             # from neuralforecast.auto import AutoAutoformer as AutoAFormer
@@ -421,7 +449,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 FEDformer,
                 Informer,
                 PatchTST,
-                TimesNet,
             )
 
             # from neuralforecast.models import Autoformer as AFormer
@@ -441,8 +468,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 # "AutoAFormer": AutoAFormer,
                 "Informer": Informer,
                 "AutoInformer": AutoInformer,
-                "TimesNet": TimesNet,
-                "AutoTimesNet": AutoTimesNet,
                 "TFT": TFT,
                 "AutoTFT": AutoTFT,
             }
@@ -590,12 +615,11 @@ class CreateFunctionExecutor(AbstractExecutor):
                                 crossvalidation_df.unique_id == uid
                             ]
                             rmses.append(
-                                mean_squared_error(
+                                root_mean_squared_error(
                                     crossvalidation_df_here.y,
                                     crossvalidation_df_here[
                                         arg_map["model"] + "-median"
                                     ],
-                                    squared=False,
                                 )
                                 / np.mean(crossvalidation_df_here.y)
                             )
@@ -631,10 +655,9 @@ class CreateFunctionExecutor(AbstractExecutor):
                             crossvalidation_df.unique_id == uid
                         ]
                         rmses.append(
-                            mean_squared_error(
+                            root_mean_squared_error(
                                 crossvalidation_df_here.y,
                                 crossvalidation_df_here[arg_map["model"]],
-                                squared=False,
                             )
                             / np.mean(crossvalidation_df_here.y)
                         )
@@ -752,6 +775,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 function_type,
                 io_list,
                 metadata,
+                best_score,
+                train_time,
             ) = self.handle_ludwig_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Sklearn"):
             (
@@ -760,6 +785,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 function_type,
                 io_list,
                 metadata,
+                best_score,
+                train_time,
             ) = self.handle_sklearn_function()
         elif string_comparison_case_insensitive(self.node.function_type, "XGBoost"):
             (
@@ -802,7 +829,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                     [
                         msg,
                         "Validation Score: " + str(best_score),
-                        "Training time: " + str(train_time),
+                        "Training time: " + str(train_time) + " secs.",
                     ]
                 )
             )

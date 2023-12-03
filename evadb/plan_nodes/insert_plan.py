@@ -55,6 +55,6 @@ class InsertPlan(AbstractPlan):
                 super().__hash__(),
                 self.table_ref,
                 tuple(self.column_list),
-                tuple(self.value_list),
+                tuple(tuple(val) for val in self.value_list),
             )
         )

@@ -13,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.parser.create_function_statement import CreateFunctionStatement
-from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement
+from evadb.parser.create_statement import (
+    CreateDatabaseStatement,
+    CreateJobStatement,
+    CreateTableStatement,
+)
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -30,6 +34,7 @@ from evadb.parser.use_statement import UseStatement
 # directly to the executor.
 SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (
     CreateDatabaseStatement,
+    CreateJobStatement,
     UseStatement,
     SetStatement,
 )

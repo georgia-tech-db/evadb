@@ -58,7 +58,7 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
    * - LIBRARY (str, default: 'statsforecast')
      - We can select one of `statsforecast` (default) or `neuralforecast`. `statsforecast` provides access to statistical forecasting methods, while `neuralforecast` gives access to deep-learning based forecasting methods.
    * - MODEL (str, default: 'ARIMA')
-     - If LIBRARY is `statsforecast`, we can select one of ARIMA, ting, ETS, Theta. The default is ARIMA. Check `Automatic Forecasting <https://nixtla.github.io/statsforecast/src/core/models_intro.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `NBEATS docs <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
+     - If LIBRARY is `statsforecast`, we can select one of ARIMA, ting, ETS, Theta. The default is ARIMA. Check `Automatic Forecasting <https://nixtla.mintlify.app/statsforecast/index.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `NBEATS docs <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
    * - AUTO (str, default: 'T')
      - If set to 'T', it enables automatic hyperparameter optimization. Must be set to 'T' for `statsforecast` library. One may set this parameter to `false` if LIBRARY is `neuralforecast` for faster (but less reliable) results.
    * - CONF (int, default: 90)
@@ -103,4 +103,3 @@ Below is an example query with `neuralforecast` with `trend` column as exogenous
     LIBRARY 'neuralforecast'
     AUTO 'f'
     FREQUENCY 'M';
-

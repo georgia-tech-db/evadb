@@ -975,10 +975,13 @@ VideoFormat
 VideoStorageEngineTest
 VideoWriter
 VisionEncoderDecoderModel
+WEAVIATE
 WH
 WIP
 WMV
 WeakValueDictionary
+Weaviate
+WeaviateVectorStore
 XGBoost
 XdistTests
 Xeon
@@ -1731,6 +1734,7 @@ testRayErrorHandling
 testSimilarityFeatureTable
 testSimilarityImageDataset
 testSimilarityTable
+testWeaviateIndexImageDataset
 testcase
 testcases
 testdeleteone
@@ -1814,6 +1818,7 @@ wal
 warmup
 wb
 weakref
+weaviate
 westbrae
 wget
 whitespaces

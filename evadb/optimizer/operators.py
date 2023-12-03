@@ -491,7 +491,7 @@ class LogicalInsert(Operator):
             (
                 super().__hash__(),
                 self.table,
-                tuple(self.value_list),
+                tuple(tuple(i) for i in self.value_list),
                 tuple(self.column_list),
             )
         )

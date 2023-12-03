@@ -104,6 +104,11 @@ class ModelTrainTests(unittest.TestCase):
             ],
         )
 
+    @pytest.mark.skip(
+        reason="Neuralforecast intergration test takes too long to complete without GPU."
+    )
+    @forecast_skip_marker
+    def test_forecast_neuralforecast(self):
         create_predict_udf = """
             CREATE FUNCTION AirPanelForecast FROM
             (SELECT unique_id, ds, y, trend FROM AirDataPanel)
