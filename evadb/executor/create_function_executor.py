@@ -24,7 +24,6 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
 
 from evadb.catalog.catalog_utils import get_metadata_properties
 from evadb.catalog.models.function_catalog import FunctionCatalogEntry
