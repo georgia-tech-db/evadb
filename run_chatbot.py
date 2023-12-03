@@ -3,14 +3,18 @@ from convert_instructions_to_pdf import *
 import os
 from llama_index import VectorStoreIndex, SimpleDirectoryReader
 
-os.environ["OPENAI_API_KEY"] = "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"
+
 parser = argparse.ArgumentParser(description='A chatbot for EvaDB')
 
 parser.add_argument("--reload_docs", help="Reload all the RST files and rebuild the index")
+parser.add_argument("--open_ai_key", help="OpenAI key")
 
 args = parser.parse_args()
 
 reload_docs_flag = args.reload_docs
+open_ai_key = args.open_ai_key
+
+os.environ["OPENAI_API_KEY"] = open_ai_key
 
 
 if reload_docs_flag == "True":
