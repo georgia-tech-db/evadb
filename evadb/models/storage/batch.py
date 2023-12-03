@@ -418,6 +418,7 @@ class Batch:
         if len(alias.col_names):
             if (len(self.columns) != len(alias.col_names) and forecast is False) or (
                 forecast is True
+                and (self.columns != alias.col_names)
                 and list(set(alias.col_names) - set(self.columns)) != ["plot"]
             ):
                 err_msg = (

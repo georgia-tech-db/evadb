@@ -101,7 +101,7 @@ class ModelTrainTests(unittest.TestCase):
                 "airforecast.y",
                 "airforecast.y-lo",
                 "airforecast.y-hi",
-                "plot",
+                "airforecast.plot",
             ],
         )
 
@@ -168,7 +168,7 @@ class ModelTrainTests(unittest.TestCase):
                 "homeforecast.ma",
                 "homeforecast.ma-lo",
                 "homeforecast.ma-hi",
-                "plot",
+                "homeforecast.plot",
             ],
         )
 
