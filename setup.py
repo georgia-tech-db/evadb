@@ -92,6 +92,7 @@ function_libs = [
     "boto3",  # AWS
     "norfair>=2.2.0",  # OBJECT TRACKING
     "kornia",  # SIFT FEATURES
+    "pytesseract",  
 ]
 
 ray_libs = [

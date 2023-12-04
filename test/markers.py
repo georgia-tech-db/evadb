@@ -26,6 +26,7 @@ from evadb.utils.generic_utils import (
     is_ludwig_available,
     is_milvus_available,
     is_pinecone_available,
+    is_pytessseract_available,
     is_qdrant_available,
     is_replicate_available,
     is_weaviate_available,
@@ -116,4 +117,8 @@ forecast_skip_marker = pytest.mark.skipif(
 
 stable_diffusion_skip_marker = pytest.mark.skipif(
     is_replicate_available() is False, reason="requires replicate"
+)
+
+pytesseract_skip_marker = pytest.mark.skipif(
+    is_pytessseract_available() is False, reason="requires pytesseract"
 )
