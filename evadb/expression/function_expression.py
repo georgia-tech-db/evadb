@@ -127,7 +127,6 @@ class FunctionExpression(AbstractExpression):
         with self._stats.timer:
             # apply the function and project the required columns
             outcomes = self._apply_function_expression(func, batch, **kwargs)
-
             # process outcomes only if output is not empty
             if outcomes.frames.empty is False:
                 outcomes = outcomes.project(self.projection_columns)
@@ -183,7 +182,6 @@ class FunctionExpression(AbstractExpression):
         func_args = Batch.merge_column_wise(
             [child.evaluate(batch, **kwargs) for child in self.children]
         )
-
         if not self._cache:
             return func_args.apply_function_expression(func)
 

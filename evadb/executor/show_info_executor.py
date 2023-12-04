@@ -33,7 +33,7 @@ class ShowInfoExecutor(AbstractExecutor):
             self.node.show_type is ShowType.FUNCTIONS
             or ShowType.TABLES
             or ShowType.DATABASES
-            or ShowType.CONFIGS
+            or ShowType.CONFIG
         ), f"Show command does not support type {self.node.show_type}"
 
         if self.node.show_type is ShowType.FUNCTIONS:
@@ -50,23 +50,16 @@ class ShowInfoExecutor(AbstractExecutor):
             databases = self.catalog().get_all_database_catalog_entries()
             for db in databases:
                 show_entries.append(db.display_format())
-        elif self.node.show_type is ShowType.CONFIGS:
+        elif self.node.show_type is ShowType.CONFIG:
+            value = self.catalog().get_configuration_catalog_value(
+                key=self.node.show_val.upper(),
+            )
             show_entries = {}
-            # CONFIGS is a special word, which is used to display all the configurations
-            if self.node.show_val.upper() == ShowType.CONFIGS.name:
-                configs = self.catalog().get_all_configuration_catalog_entries()
-                for config in configs:
-                    show_entries[config.key] = config.value
+            if value is not None:
+                show_entries = {self.node.show_val: [value]}
             else:
-                value = self.catalog().get_configuration_catalog_value(
-                    key=self.node.show_val.upper(),
+                raise Exception(
+                    "No configuration found with key {}".format(self.node.show_val)
                 )
-                show_entries = {}
-                if value is not None:
-                    show_entries = {self.node.show_val: [value]}
-                else:
-                    raise Exception(
-                        "No configuration found with key {}".format(self.node.show_val)
-                    )
 
         yield Batch(pd.DataFrame(show_entries))
