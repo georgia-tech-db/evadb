@@ -15,6 +15,7 @@
 from typing import List, Type
 
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
+from evadb.executor.executor_utils import ExecutorError
 from evadb.functions.abstract.abstract_function import AbstractFunction
 
 
@@ -80,6 +81,10 @@ def load_io_from_function_decorators(
     assert (
         io_signature is not None
     ), f"Cannot infer {tag_key} signature from the decorator for {function}.\n {missing_io_signature_helper()}"
+
+    # added error check when forward() takes more than one pandas dataframe
+    if len(io_signature) > 1:
+        raise ExecutorError("forward() only takes one pandas dataframe as input.")
 
     result_list = []
     for io in io_signature:
