@@ -19,6 +19,7 @@ import os
 import pickle
 import re
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
@@ -233,6 +234,8 @@ class CreateFunctionExecutor(AbstractExecutor):
 
     def convert_to_numeric(self, x):
         x = re.sub("[^0-9.,]", "", str(x))
+        if x is None or x == '':
+            return x
         locale.setlocale(locale.LC_ALL, "")
         x = float(locale.atof(x))
         if x.is_integer():
@@ -421,6 +424,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             frequency.split("-")[0] if "-" in frequency else frequency
         )  # shortens longer frequencies like Q-DEC
         season_length = season_dict[new_freq] if new_freq in season_dict else 1
+
+        start = arg_map.get("start", None)
 
         """
             Neuralforecast implementation
@@ -683,6 +688,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
             FunctionMetadataCatalogEntry("conf", conf),
+            FunctionMetadataCatalogEntry("start", start),
+            FunctionMetadataCatalogEntry("frequency", new_freq),
         ]
 
         return (
