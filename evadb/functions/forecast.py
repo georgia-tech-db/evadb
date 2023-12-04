@@ -17,6 +17,9 @@
 import os
 import pickle
 
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from evadb.functions.abstract.abstract_function import AbstractFunction
@@ -39,6 +42,8 @@ class ForecastModel(AbstractFunction):
         horizon: int,
         library: str,
         conf: int,
+        last_ds: list,
+        last_y: list,
     ):
         self.library = library
         if "neuralforecast" in self.library:
@@ -67,6 +72,8 @@ class ForecastModel(AbstractFunction):
                 self.rmse = float(f.readline())
                 if "arima" in model_name.lower():
                     self.hypers = "p,d,q: " + f.readline()
+        self.last_ds = last_ds
+        self.last_y = last_y
 
     def forward(self, data) -> pd.DataFrame:
         log_str = ""
@@ -79,7 +86,7 @@ class ForecastModel(AbstractFunction):
 
         # Feedback
         if len(data) == 0 or list(list(data.iloc[0]))[0] is True:
-            # Suggestions
+            ## Suggestions
             suggestion_list = []
             # 1: Flat predictions
             if self.library == "statsforecast":
@@ -95,11 +102,68 @@ class ForecastModel(AbstractFunction):
             for suggestion in set(suggestion_list):
                 log_str += "\nSUGGESTION: " + self.suggestion_dict[suggestion]
 
-            # Metrics
+            ## Metrics
             if self.rmse is not None:
                 log_str += "\nMean normalized RMSE: " + str(self.rmse)
             if self.hypers is not None:
                 log_str += "\nHyperparameters: " + self.hypers
+
+            ## Plot figure
+
+            pred_plt = self.last_y + list(
+                forecast_df[
+                    self.model_name
+                    if self.library == "statsforecast"
+                    else self.model_name + "-median"
+                ]
+            )
+            pred_plt_lo = self.last_y + list(
+                forecast_df[self.model_name + "-lo-" + str(self.conf)]
+            )
+            pred_plt_hi = self.last_y + list(
+                forecast_df[self.model_name + "-hi-" + str(self.conf)]
+            )
+
+            plt.plot(pred_plt, label="Prediction")
+            plt.fill_between(
+                x=range(len(pred_plt)), y1=pred_plt_lo, y2=pred_plt_hi, alpha=0.3
+            )
+            plt.plot(self.last_y, label="Actual")
+            plt.xlabel("Time")
+            plt.ylabel("Value")
+            xtick_strs = self.last_ds + list(forecast_df["ds"])
+            num_to_keep_args = list(
+                range(0, len(xtick_strs), int((len(xtick_strs) - 2) / 8))
+            ) + [len(xtick_strs) - 1]
+            xtick_strs = [
+                x if i in num_to_keep_args else "" for i, x in enumerate(xtick_strs)
+            ]
+            plt.xticks(range(len(pred_plt)), xtick_strs, rotation=85)
+            plt.legend()
+            plt.tight_layout()
+
+            # convert plt figure to opencv, inspired from https://copyprogramming.com/howto/convert-matplotlib-figure-to-cv2-image-a-complete-guide-with-examples#converting-matplotlib-figure-to-cv2-image
+            # convert figure to canvas
+            canvas = plt.get_current_fig_manager().canvas
+
+            # render the canvas
+            canvas.draw()
+
+            # convert canvas to image
+            img = np.fromstring(canvas.tostring_rgb(), dtype="uint8")
+            img = img.reshape(canvas.get_width_height()[::-1] + (3,))
+
+            # convert image to cv2 format
+            cv2_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+            # Conver to bytes
+            _, buffer = cv2.imencode(".jpg", cv2_img)
+            img_bytes = buffer.tobytes()
+
+            # Add to dataframe as a plot
+            forecast_df["plot"] = [img_bytes] + [None] * (len(forecast_df) - 1)
+
+            log_str += "\nA plot has been saved in the 'plot' column of the output table. It maybe rendered using the cv2.imdecode function."
 
             print(log_str)
 

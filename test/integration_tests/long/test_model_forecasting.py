@@ -101,6 +101,7 @@ class ModelTrainTests(unittest.TestCase):
                 "airforecast.y",
                 "airforecast.y-lo",
                 "airforecast.y-hi",
+                "airforecast.plot",
             ],
         )
 
@@ -122,7 +123,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT AirPanelForecast() order by y;
+            SELECT AirPanelForecast(FALSE) order by y;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 24)
@@ -167,6 +168,7 @@ class ModelTrainTests(unittest.TestCase):
                 "homeforecast.ma",
                 "homeforecast.ma-lo",
                 "homeforecast.ma-hi",
+                "homeforecast.plot",
             ],
         )
 

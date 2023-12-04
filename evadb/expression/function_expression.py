@@ -130,8 +130,12 @@ class FunctionExpression(AbstractExpression):
 
             # process outcomes only if output is not empty
             if outcomes.frames.empty is False:
-                outcomes = outcomes.project(self.projection_columns)
-                outcomes.modify_column_alias(self.alias)
+                if self._function().name == "ForecastModel":
+                    outcomes = outcomes.project(self.projection_columns, forecast=True)
+                    outcomes.modify_column_alias(self.alias, forecast=True)
+                else:
+                    outcomes = outcomes.project(self.projection_columns)
+                    outcomes.modify_column_alias(self.alias)
 
         # record the number of function calls
         self._stats.num_calls += len(batch)

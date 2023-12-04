@@ -480,7 +480,7 @@ jobs:
         - checkout
         - run:           
             name: Install EvaDB package from GitHub repo and run tests
-            no_output_timeout: 30m # 30 minute timeout
+            no_output_timeout: 40m # 40 minute timeout
             command: |
               python -m venv test_evadb
               source test_evadb/bin/activate

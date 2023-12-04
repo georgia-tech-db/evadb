@@ -29,7 +29,6 @@ from evadb.binder.binder_utils import (
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import is_document_table
-from evadb.catalog.sql_config import RESTRICTED_COL_NAMES
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -137,6 +136,12 @@ class StatementBinder:
                             None,
                             None,
                         ),
+                        ColumnDefinition(
+                            "plot",
+                            ColumnType.ANY,
+                            None,
+                            None,
+                        ),
                     ]
                 )
             else:
@@ -211,12 +216,6 @@ class StatementBinder:
 
     @bind.register(CreateTableStatement)
     def _bind_create_statement(self, node: CreateTableStatement):
-        # we don't allow certain keywords in the column_names
-        for col in node.column_list:
-            assert (
-                col.name.lower() not in RESTRICTED_COL_NAMES
-            ), f"EvaDB does not allow to create a table with column name {col.name}"
-
         if node.query is not None:
             self.bind(node.query)
 
