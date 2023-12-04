@@ -59,7 +59,8 @@ def column_definition_to_function_io(col_list: List[ColumnDefinition], is_input:
             FunctionIOCatalogEntry(
                 col.name,
                 col.type,
-                col.cci.nullable,
+                rename_rules=col.name,
+                is_nullable=col.cci.nullable,
                 array_type=col.array_type,
                 array_dimensions=col.dimension,
                 is_input=is_input,

@@ -102,10 +102,6 @@ Open_function_query = """CREATE FUNCTION IF NOT EXISTS Open
 )
 
 Similarity_function_query = """CREATE FUNCTION IF NOT EXISTS Similarity
-                    INPUT (Frame_Array_Open NDARRAY UINT8(3, ANYDIM, ANYDIM),
-                           Frame_Array_Base NDARRAY UINT8(3, ANYDIM, ANYDIM),
-                           Feature_Extractor_Name TEXT(100))
-                    OUTPUT (distance FLOAT(32, 7))
                     TYPE NdarrayFunction
                     IMPL "{}/functions/{}/similarity.py";
         """.format(

@@ -52,7 +52,7 @@ class SentenceTransformerFeatureExtractor(AbstractFunction, GPUCompatible):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["data"],
+                columns=["data,* as 0"],
                 column_types=[NdArrayType.STR],
                 column_shapes=[(1)],
             )

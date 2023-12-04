@@ -14,7 +14,10 @@
 # limitations under the License.
 import pandas as pd
 
+from evadb.catalog.catalog_type import Dimension, NdArrayType
 from evadb.functions.abstract.abstract_function import AbstractFunction
+from evadb.functions.decorators.decorators import forward
+from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.utils.generic_utils import try_to_import_faiss
 
 
@@ -30,6 +33,28 @@ class Similarity(AbstractFunction):
     def name(self):
         return "Similarity"
 
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=[
+                    "open_feat_np,* as open_feat_np",
+                    "base_feat_np,* as base_feat_np",
+                ],
+                column_types=[NdArrayType.UINT8, NdArrayType.UINT8],
+                column_shapes=[
+                    (3, Dimension.ANYDIM, Dimension.ANYDIM),
+                    (3, Dimension.ANYDIM, Dimension.ANYDIM),
+                ],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["distance"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(32, 7)],
+            )
+        ],
+    )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Get similarity score between two feature vectors: 1. feature vector of an opened image;
@@ -37,10 +62,7 @@ class Similarity(AbstractFunction):
         """
 
         def _similarity(row: pd.Series) -> float:
-            open_feat_np, base_feat_np = (
-                row.iloc[0],
-                row.iloc[1],
-            )
+            open_feat_np, base_feat_np = row["open_feat_np"], row["base_feat_np"]
 
             # TODO: currently system takes care of feature vector shape
             # transformation. Improve this later on.

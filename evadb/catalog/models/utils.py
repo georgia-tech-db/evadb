@@ -162,6 +162,7 @@ class FunctionIOCatalogEntry:
 
     name: str
     type: ColumnType
+    rename_rules: str = None
     is_nullable: bool = False
     array_type: NdArrayType = None
     array_dimensions: Tuple[int] = None

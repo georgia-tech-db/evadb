@@ -450,3 +450,104 @@ class Batch:
     def rename(self, columns) -> None:
         "Rename column names"
         self._frames.rename(columns=columns, inplace=True)
+
+    def rename_for_function_io(self, func_name, io_names_and_rename_rules) -> None:
+        def do_simply_renaming(func_name, target_columns, source_columns):
+            rules = "; ".join(
+                [
+                    f"{target_rule} as {target_name}"
+                    for target_name, target_rule in target_columns
+                ]
+            )
+            logger.warn(
+                f"Could not satisfy column mapping for function call to {func_name}. Rules: ({rules}). Input Columns: {source_columns}. Doing simple mapping with index"
+            )
+            bound_columns = {}
+            for i in range(len(target_columns)):
+                bound_columns[i] = target_columns[i][0]
+            return bound_columns
+
+        def column_map(func_name, target_columns, source_columns):
+            bound_target_columns = set()
+            bound_source_columns = set()
+            bound_columns = {}
+
+            # Stage 1: Strict mapping
+            for target_name, target_rules in target_columns:
+                if "*" not in target_rules and "," not in target_rules:
+                    if target_name not in bound_target_columns:
+                        for i in range(len(source_columns)):
+                            if (
+                                i not in bound_source_columns
+                                and source_columns[i] == target_name
+                            ):
+                                bound_source_columns.add(i)
+                                bound_target_columns.add(target_name)
+                                bound_columns[i] = target_name
+                                break
+                        else:
+                            return do_simply_renaming(
+                                func_name, target_columns, source_columns
+                            )
+
+            # Stage 2: Name-List mapping
+
+            for target_name, target_rules in target_columns:
+                if target_name not in bound_target_columns:
+                    possible_names = target_rules.replace(" ", "").split(",")
+                    optional = False
+                    if possible_names[-1] == "*":
+                        optional = True
+                        possible_names.pop()
+                    for name in possible_names:
+                        for i in range(len(source_columns)):
+                            if (
+                                i not in bound_source_columns
+                                and source_columns[i] == name
+                            ):
+                                bound_source_columns.add(i)
+                                bound_target_columns.add(target_name)
+                                bound_columns[i] = target_name
+                                break
+                    else:
+                        if not optional:
+                            return do_simply_renaming(
+                                func_name, target_columns, source_columns
+                            )
+
+            # Stage 3: * mapping
+
+            for target_name, target_rules in target_columns:
+                if target_name not in bound_target_columns:
+                    for i in range(len(source_columns)):
+                        if i not in bound_source_columns:
+                            bound_source_columns.add(i)
+                            bound_target_columns.add(target_name)
+                            bound_columns[i] = target_name
+                            break
+                    else:
+                        return do_simply_renaming(
+                            func_name, target_columns, source_columns
+                        )
+
+            return bound_columns
+
+        cur_names = self._frames.columns.values
+        io_names_and_rename_rules = [
+            (target_name, target_rule if target_rule is not None else target_name)
+            for target_name, target_rule in io_names_and_rename_rules
+        ]
+        mapping = column_map(func_name, io_names_and_rename_rules, cur_names)
+        new_names = []
+        for i in range(len(cur_names)):
+            value = None
+            if i in mapping:
+                value = mapping[i]
+            else:
+                value = cur_names[i]
+            try:
+                value = int(value)
+            except ValueError:
+                pass
+            new_names.append(value)
+        self._frames.columns = new_names
