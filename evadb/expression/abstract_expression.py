@@ -48,6 +48,7 @@ class ExpressionType(IntEnum):
 
     FUNCTION_EXPRESSION = auto()
 
+    # Aggregation functions
     AGGREGATION_COUNT = auto()
     AGGREGATION_SUM = auto()
     AGGREGATION_MIN = auto()
@@ -56,6 +57,7 @@ class ExpressionType(IntEnum):
     AGGREGATION_FIRST = auto()
     AGGREGATION_LAST = auto()
     AGGREGATION_SEGMENT = auto()
+    AGGREGATION_STRING_AGG = auto()
 
     CASE = auto()
     # add other types

@@ -300,11 +300,12 @@ function_call: function         ->function_call
 
 function: simple_id "(" (STAR | function_args)? ")" dotted_id?
     
-aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
+aggregate_windowed_function: STRING_AGG "(" function_arg "," function_arg ")"
+                           | aggregate_function_name "(" function_arg ")"
                            | COUNT "(" (STAR | function_arg) ")"
     
 
-aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT
+aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT | STRING_AGG
 
 function_args: (function_arg) ("," function_arg)*
     
@@ -488,6 +489,7 @@ FCOUNT: 						     "FCOUNT"i
 FIRST:                               "FIRST"i
 LAST:                                "LAST"i
 SEGMENT:                             "SEGMENT"i
+STRING_AGG:                          "STRING_AGG"i 
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID
