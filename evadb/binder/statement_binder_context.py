@@ -142,9 +142,6 @@ class StatementBinderContext:
             A tuple of alias and column object
         """
 
-        # binder is case insensitive
-        col_name = col_name.lower()
-
         def raise_error():
             all_columns = sorted(
                 list(set([col for _, col in self._get_all_alias_and_col_name()]))
