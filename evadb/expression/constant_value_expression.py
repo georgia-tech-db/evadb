@@ -59,7 +59,7 @@ class ConstantValueExpression(AbstractExpression):
         is_equal = is_subtree_equal and self.v_type == other.v_type
 
         if self.v_type == ColumnType.NDARRAY:
-            return is_equal and all(self.value == other.value)
+            return is_equal and (self.value == other.value).all()
         else:
             return is_equal and self.value == other.value
 

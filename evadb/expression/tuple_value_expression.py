@@ -51,6 +51,10 @@ class TupleValueExpression(AbstractExpression):
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+
     @property
     def col_object(self) -> Union[ColumnCatalogEntry, FunctionIOCatalogEntry]:
         return self._col_object

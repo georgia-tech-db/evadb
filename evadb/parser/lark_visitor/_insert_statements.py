@@ -41,6 +41,9 @@ class Insert:
                 elif child.data == "insert_statement_value":
                     value_list = self.visit(child)
 
+        for i in range(len(column_list)):
+            column_list[i].name = column_list[i].name.lower()
+
         insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
         return insert_stmt
 

@@ -52,7 +52,7 @@ class ColumnDefinition:
         col_dim: Tuple[int],
         cci: ColConstraintInfo = ColConstraintInfo(),
     ):
-        self._name = col_name
+        self._name = col_name.lower()
         self._type = col_type
         self._array_type = col_array_type
         self._dimension = col_dim or ()
