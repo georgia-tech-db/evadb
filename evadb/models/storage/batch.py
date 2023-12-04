@@ -450,3 +450,19 @@ class Batch:
     def rename(self, columns) -> None:
         "Rename column names"
         self._frames.rename(columns=columns, inplace=True)
+
+    def aggregate_string_aggregation(self, column_name:str, delimiter:str):
+        # First, ensure the column data is in string format
+        string_column = self._frames[column_name].astype(str)
+
+        def aggregate_column(data, sep):
+            # Join the data using the provided separator
+            aggregated_string = sep.join(data)
+            return aggregated_string
+
+        aggregated_result = aggregate_column(string_column, delimiter)
+
+        aggregated_dataframe = pd.DataFrame({column_name: [aggregated_result]})
+
+        # Update the original DataFrame with the new aggregated DataFrame
+        self._frames = aggregated_dataframe

@@ -41,10 +41,23 @@ class EvaDBDatabase:
         return self.catalog_func(self.catalog_uri)
 
 
-def get_default_db_uri(evadb_dir: Path):
+def get_default_db_uri_sqlite(evadb_dir: Path):
     # Default to sqlite.
     return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
+def get_default_db_uri(evadb_dir: Path):
+    """
+        Generates a PostgreSQL connection URI for the local database.
+
+        Returns:
+        str: A PostgreSQL connection URI.
+        """
+    user = "evadb"
+    password = "password"
+    host = "localhost"
+    port = 5432  # Default PostgreSQL port
+    db_name = "evadb"
+    return f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
 
 def init_evadb_instance(
     db_dir: str, host: str = None, port: int = None, custom_db_uri: str = None
