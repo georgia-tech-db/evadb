@@ -111,6 +111,8 @@ parts:
             title: YOLO 
           - file: source/reference/ai/stablediffusion
             title: Stable Diffusion
+          - file: source/reference/ai/e2b-code-execution
+            title: E2B Sandboxed Code Execution
 
       - file: source/reference/ai/custom-ai-function
         title: Bring Your Own AI Function
