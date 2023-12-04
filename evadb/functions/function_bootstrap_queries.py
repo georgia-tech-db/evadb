@@ -20,6 +20,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
 
+
 DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
@@ -289,8 +290,8 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         stablediffusion_function_query,
         dalle_function_query,
         Upper_function_query,
-        Lower_function_query,
         Concat_function_query,
+        Lower_function_query,
     ]
 
     # if mode is 'debug', add debug functions

@@ -15,6 +15,7 @@
 from pathlib import Path
 from typing import List, Tuple
 
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
@@ -64,7 +65,18 @@ class CreateFunctionStatement(AbstractStatement):
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
-        self._impl_path = Path(impl_path) if impl_path else None
+
+        if impl_path:
+            if len(str(impl_path)) < 12:
+                self._impl_path = Path(impl_path)
+            elif "DBFUNCTIONS" == str(impl_path)[0:11] and (str(impl_path)[11:12] == "." or str(impl_path)[11:12] == "\\" or str(impl_path)[11:12] == "/"):
+                self._impl_path = Path(str(EvaDB_INSTALLATION_DIR) + "\\functions\\" + str(impl_path)[12:])
+            elif "ENVFUNCTIONS" == str(impl_path)[0:12] and (str(impl_path)[12:13] == "." or str(impl_path)[12:13] == "\\" or str(impl_path)[12:13] == "/"):
+                self._impl_path = Path( "..\\functions\\" + str(impl_path)[13:])
+            else:
+                self._impl_path = Path(impl_path)
+        else:
+            self._impl_path = None
         self._function_type = function_type
         self._query = query
         self._metadata = metadata
