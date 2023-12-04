@@ -34,3 +34,12 @@ depend_column_and_function_cache = Table(
     Column("_function_cache_id", ForeignKey("function_cache._row_id")),
     UniqueConstraint("_col_id", "_function_cache_id"),
 )
+
+
+depend_include_column_and_index = Table(
+    "depend_include_column_and_index",
+    BaseModel.metadata,
+    Column("_include_col_id", ForeignKey("column_catalog._row_id")),
+    Column("_index_id", ForeignKey("index_catalog._row_id")),
+    UniqueConstraint("_include_col_id", "_index_id"),
+)

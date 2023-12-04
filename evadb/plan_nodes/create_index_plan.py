@@ -30,6 +30,7 @@ class CreateIndexPlan(AbstractPlan):
         if_not_exists: bool,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
+        include_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
         project_expr_list: List[AbstractExpression],
         index_def: str,
@@ -39,6 +40,7 @@ class CreateIndexPlan(AbstractPlan):
         self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
+        self._include_list = include_list
         self._vector_store_type = vector_store_type
         self._project_expr_list = project_expr_list
         self._index_def = index_def
@@ -58,6 +60,10 @@ class CreateIndexPlan(AbstractPlan):
     @property
     def col_list(self):
         return self._col_list
+
+    @property
+    def include_list(self):
+        return self._include_list
 
     @property
     def vector_store_type(self):
@@ -80,11 +86,13 @@ class CreateIndexPlan(AbstractPlan):
         return "CreateIndexPlan(name={}, \
             table_ref={}, \
             col_list={}, \
+            include_list={}, \
             vector_store_type={}, \
             {})".format(
             self._name,
             self._table_ref,
             tuple(self._col_list),
+            tuple(self._include_list),
             self._vector_store_type,
             "" if function_expr is None else "function={}".format(function_expr),
         )
@@ -97,6 +105,7 @@ class CreateIndexPlan(AbstractPlan):
                 self.if_not_exists,
                 self.table_ref,
                 tuple(self.col_list),
+                tuple(self.include_list),
                 self.vector_store_type,
                 tuple(self.project_expr_list),
                 self.index_def,

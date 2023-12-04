@@ -69,3 +69,9 @@ class VectorStoreFactory:
 
         else:
             raise Exception(f"Vector store {vector_store_type} not supported")
+
+
+def supports_hybrid_search(vector_store_type: VectorStoreType) -> bool:
+    vector_stores_supporting_hybrid_search = [VectorStoreType.MILVUS]
+
+    return vector_store_type in vector_stores_supporting_hybrid_search

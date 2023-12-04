@@ -22,7 +22,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
 from evadb.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from evadb.catalog.models.association_models import depend_column_and_function_cache
+from evadb.catalog.models.association_models import (
+    depend_column_and_function_cache,
+    depend_include_column_and_index,
+)
 from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.models.utils import ColumnCatalogEntry
 
@@ -38,6 +41,7 @@ class ColumnCatalog(BaseModel):
     `_array_dimensions:` the dimensions of the array (if `_array_type` is not `None`)
     `_table_id:` the `_row_id` of the `TableCatalog` entry to which the column belongs
     `_dep_caches`: list of function caches associated with the column
+    `_dep_include_indexes`: list of indexes that the column is associated with by inclusion
     """
 
     __tablename__ = "column_catalog"
@@ -59,6 +63,14 @@ class ColumnCatalog(BaseModel):
         "FunctionCacheCatalog",
         secondary=depend_column_and_function_cache,
         back_populates="_col_depends",
+        cascade="all, delete",
+    )
+
+    # list of associated IndexCatalog entries by included column
+    _dep_include_indexes = relationship(
+        "IndexCatalog",
+        secondary=depend_include_column_and_index,
+        back_populates="_dep_include_columns",
         cascade="all, delete",
     )
 

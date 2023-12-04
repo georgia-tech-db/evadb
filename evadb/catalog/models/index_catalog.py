@@ -20,6 +20,7 @@ from sqlalchemy.types import Enum
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.models.utils import IndexCatalogEntry
+from evadb.catalog.models.association_models import depend_include_column_and_index
 
 
 class IndexCatalog(BaseModel):
@@ -33,6 +34,7 @@ class IndexCatalog(BaseModel):
                       the function signature of the used function. Otherwise, this field is None.
     `_index_def:` the original SQL statement that is used to create this index. We record this to rerun create index
                 on updated table.
+    `_dep_include_columns:` a list of the `ColumnCatalog` entries that are included in the index
     """
 
     __tablename__ = "index_catalog"
@@ -49,6 +51,13 @@ class IndexCatalog(BaseModel):
     _feat_column = relationship(
         "ColumnCatalog",
         back_populates="_index_column",
+    )
+
+    _dep_include_columns = relationship(
+        "ColumnCatalog",
+        secondary=depend_include_column_and_index,
+        back_populates="_dep_include_indexes",
+        cascade="all, delete",
     )
 
     def __init__(
@@ -78,4 +87,7 @@ class IndexCatalog(BaseModel):
             function_signature=self._function_signature,
             index_def=self._index_def,
             feat_column=feat_column,
+            include_columns=[
+                column.as_dataclass() for column in self._dep_include_columns
+            ],
         )

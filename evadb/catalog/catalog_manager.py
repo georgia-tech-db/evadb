@@ -568,6 +568,7 @@ class CatalogManager(object):
         feat_column: ColumnCatalogEntry,
         function_signature: str,
         index_def: str,
+        include_columns: List[ColumnCatalogEntry],
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
             name,
@@ -576,6 +577,7 @@ class CatalogManager(object):
             feat_column,
             function_signature,
             index_def,
+            include_columns,
         )
         return index_catalog_entry
 

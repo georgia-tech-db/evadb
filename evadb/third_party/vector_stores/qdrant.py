@@ -45,7 +45,7 @@ class QdrantVectorStore(VectorStore):
         self._client = get_qdrant_client(index_db)
         self._collection_name = index_name
 
-    def create(self, vector_dim: int):
+    def create(self, vector_dim: int, *_):
         from qdrant_client.models import Distance, VectorParams
 
         self._client.recreate_collection(

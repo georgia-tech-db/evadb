@@ -13,19 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
+from evadb.catalog.models.utils import ColumnCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression
 
 
 @dataclass
 class FeaturePayload:
     id: int
     embedding: List[float]
+    metadata: Dict[str, any]
 
 
 @dataclass
 class VectorIndexQuery:
     embedding: List[float]
     top_k: int
+    filter_expr_str: AbstractExpression
 
 
 @dataclass
@@ -35,7 +39,11 @@ class VectorIndexQueryResult:
 
 
 class VectorStore:
-    def create(self, vector_dim: int):
+    def create(
+        self,
+        vector_dim: int,
+        metadata_column_catalog_entries: List[ColumnCatalogEntry] = None,
+    ):
         """Create an index"""
         ...
 

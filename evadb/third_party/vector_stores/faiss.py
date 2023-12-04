@@ -49,7 +49,7 @@ class FaissVectorStore(VectorStore):
             for i in range(self._index.ntotal):
                 self._existing_id_set.add(self._index.id_map.at(i))
 
-    def create(self, vector_dim: int):
+    def create(self, vector_dim: int, *_):
         import faiss
 
         self._index = faiss.IndexIDMap2(faiss.IndexHNSWFlat(vector_dim, 32))

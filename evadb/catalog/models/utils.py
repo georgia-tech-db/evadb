@@ -205,6 +205,9 @@ class IndexCatalogEntry:
     function_signature: str = None
     index_def: str = None
     feat_column: ColumnCatalogEntry = None
+    include_columns: List[ColumnCatalogEntry] = field(
+        compare=False, default_factory=list
+    )
 
 
 @dataclass(unsafe_hash=True)

@@ -13,8 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-from typing import List
+from typing import Dict, List
 
+from evadb.catalog.catalog_type import ColumnType
+from evadb.catalog.models.utils import ColumnCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.arithmetic_expression import ArithmeticExpression
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.logical_expression import LogicalExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -31,30 +39,71 @@ allowed_params = [
     "MILVUS_TOKEN",
 ]
 required_params = []
-_milvus_client_instance = None
 
 
-def get_milvus_client(
-    milvus_uri: str,
-    milvus_user: str,
-    milvus_password: str,
-    milvus_db_name: str,
-    milvus_token: str,
-):
-    global _milvus_client_instance
-    if _milvus_client_instance is None:
-        try_to_import_milvus_client()
-        import pymilvus
+def column_type_to_milvus_type(column_type: ColumnType):
+    from pymilvus import DataType
 
-        _milvus_client_instance = pymilvus.MilvusClient(
-            uri=milvus_uri,
-            user=milvus_user,
-            password=milvus_password,
-            db_name=milvus_db_name,
-            token=milvus_token,
-        )
+    if column_type == ColumnType.BOOLEAN:
+        return DataType.BOOL
+    elif column_type == ColumnType.INTEGER:
+        return DataType.INT64
+    elif column_type == ColumnType.FLOAT:
+        return DataType.FLOAT
+    elif column_type == ColumnType.TEXT:
+        return DataType.VARCHAR
+    elif column_type == ColumnType.NDARRAY:
+        return DataType.FLOAT_VECTOR
 
-    return _milvus_client_instance
+
+def etype_to_milvus_symbol(etype: ExpressionType):
+    if etype == ExpressionType.COMPARE_EQUAL:
+        return "=="
+    elif etype == ExpressionType.COMPARE_GREATER:
+        return ">"
+    elif etype == ExpressionType.COMPARE_LESSER:
+        return "<"
+    elif etype == ExpressionType.COMPARE_GEQ:
+        return ">="
+    elif etype == ExpressionType.COMPARE_LEQ:
+        return "<="
+    elif etype == ExpressionType.COMPARE_NEQ:
+        return "!="
+    elif etype == ExpressionType.COMPARE_LIKE:
+        return "LIKE"
+    elif etype == ExpressionType.LOGICAL_AND:
+        return "and"
+    elif etype == ExpressionType.LOGICAL_OR:
+        return "or"
+    elif etype == ExpressionType.LOGICAL_NOT:
+        return "not"
+    elif etype == ExpressionType.ARITHMETIC_ADD:
+        return "+"
+    elif etype == ExpressionType.ARITHMETIC_DIVIDE:
+        return "/"
+    elif etype == ExpressionType.ARITHMETIC_MULTIPLY:
+        return "*"
+    elif etype == ExpressionType.ARITHMETIC_SUBTRACT:
+        return "-"
+
+
+def expression_to_milvus_expr(expr: AbstractExpression) -> str:
+    if isinstance(expr, ComparisonExpression) or isinstance(expr, ArithmeticExpression):
+        milvus_symbol = etype_to_milvus_symbol(expr.etype)
+        return f"({expression_to_milvus_expr(expr.children[0])} {milvus_symbol} {expression_to_milvus_expr(expr.children[1])})"
+    elif isinstance(expr, LogicalExpression):
+        milvus_symbol = etype_to_milvus_symbol(expr.etype)
+        if expr.etype == ExpressionType.LOGICAL_NOT:
+            return f"({milvus_symbol} {expression_to_milvus_expr(expr.children[0])})"
+        else:
+            return f"({expression_to_milvus_expr(expr.children[0])} {milvus_symbol} {expression_to_milvus_expr(expr.children[1])})"
+    elif isinstance(expr, ConstantValueExpression):
+        if expr.v_type == ColumnType.TEXT:
+            return f'"{expr.value}"'
+        else:
+            return expr.value
+    elif isinstance(expr, TupleValueExpression):
+        return expr.name
 
 
 class MilvusVectorStore(VectorStore):
@@ -90,57 +139,137 @@ class MilvusVectorStore(VectorStore):
         if not self._milvus_token:
             self._milvus_token = os.environ.get("MILVUS_TOKEN", "")
 
-        self._client = get_milvus_client(
-            milvus_uri=self._milvus_uri,
-            milvus_user=self._milvus_user,
-            milvus_password=self._milvus_password,
-            milvus_db_name=self._milvus_db_name,
-            milvus_token=self._milvus_token,
+        self._milvus_connection_alias = "evadb-milvus"
+
+        from pymilvus import connections
+
+        connections.connect(
+            self._milvus_connection_alias,
+            user=self._milvus_user,
+            password=self._milvus_password,
+            db_name=self._milvus_db_name,
+            token=self._milvus_token,
+            uri=self._milvus_uri,
         )
+
         self._collection_name = index_name
 
-    def create(self, vector_dim: int):
-        if self._collection_name in self._client.list_collections():
-            self._client.drop_collection(self._collection_name)
-        self._client.create_collection(
-            collection_name=self._collection_name,
-            dimension=vector_dim,
-            metric_type="COSINE",
+    def create(
+        self,
+        vector_dim: int,
+        metadata_column_catalog_entries: List[ColumnCatalogEntry] = None,
+    ):
+        from pymilvus import (
+            utility,
+            FieldSchema,
+            DataType,
+            CollectionSchema,
+            Collection,
         )
 
+        # Check if collection always exists
+        if utility.has_collection(
+            self._collection_name, using=self._milvus_connection_alias
+        ):
+            utility.drop_collection(
+                self._collection_name, using=self._milvus_connection_alias
+            )
+
+        # Set the collection schema for vector embedding and metadata
+        embedding_field = FieldSchema(
+            name="vector", dtype=DataType.FLOAT_VECTOR, dim=vector_dim
+        )
+
+        id_field = FieldSchema(
+            name="id", dtype=DataType.INT64, is_primary=True, auto_id=False
+        )
+
+        def construct_metadata_field_from_entry(entry: ColumnCatalogEntry):
+            dtype = column_type_to_milvus_type(entry.type)
+            if dtype == DataType.VARCHAR:
+                return FieldSchema(name=entry.name, dtype=dtype, max_length=1000)
+            else:
+                return FieldSchema(
+                    name=entry.name,
+                    dtype=column_type_to_milvus_type(entry.type),
+                )
+
+        metadata_fields = [
+            construct_metadata_field_from_entry(entry)
+            for entry in metadata_column_catalog_entries
+        ]
+
+        schema = CollectionSchema(
+            fields=[id_field] + [embedding_field] + metadata_fields
+        )
+
+        # Create collection
+        collection = Collection(
+            name=self._collection_name,
+            schema=schema,
+            using=self._milvus_connection_alias,
+        )
+
+        # Create index on collection
+        collection.create_index(
+            "vector",
+            {
+                "metric_type": "COSINE",
+                "params": {},
+            },
+        )
+
+        collection.load()
+
     def add(self, payload: List[FeaturePayload]):
+        from pymilvus import Collection
+
         milvus_data = [
             {
                 "id": feature_payload.id,
                 "vector": feature_payload.embedding.reshape(-1).tolist(),
+                **feature_payload.metadata,
             }
             for feature_payload in payload
         ]
-        ids = [feature_payload.id for feature_payload in payload]
 
-        # Milvus Client does not have upsert operation, perform delete + insert to emulate it
-        self._client.delete(collection_name=self._collection_name, pks=ids)
+        collection = Collection(
+            name=self._collection_name, using=self._milvus_connection_alias
+        )
 
-        self._client.insert(collection_name=self._collection_name, data=milvus_data)
+        collection.upsert(milvus_data)
 
     def persist(self):
-        self._client.flush(self._collection_name)
+        from pymilvus import Collection
+
+        collection = Collection(
+            name=self._collection_name, using=self._milvus_connection_alias
+        )
+
+        collection.flush()
 
     def delete(self) -> None:
-        self._client.drop_collection(
-            collection_name=self._collection_name,
+        from pymilvus import utility
+
+        utility.drop_collection(
+            self._collection_name, using=self._milvus_connection_alias
         )
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
-        response = self._client.search(
-            collection_name=self._collection_name,
+        from pymilvus import Collection
+
+        collection = Collection(
+            name=self._collection_name, using=self._milvus_connection_alias
+        )
+
+        response = collection.search(
             data=[query.embedding.reshape(-1).tolist()],
+            anns_field="vector",
+            param={"metric_type": "COSINE"},
             limit=query.top_k,
+            expr=expression_to_milvus_expr(query.filter_expr_str),
         )[0]
 
-        distances, ids = [], []
-        for result in response:
-            distances.append(result["distance"])
-            ids.append(result["id"])
+        distances, ids = response.distances, response.ids
 
         return VectorIndexQueryResult(distances, ids)

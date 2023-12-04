@@ -21,6 +21,7 @@ from evadb.catalog.catalog_utils import is_video_table
 from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.constants import CACHEABLE_FUNCTIONS
 from evadb.executor.execution_context import Context
+from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
@@ -48,6 +49,7 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.third_party.vector_stores.utils import supports_hybrid_search
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -487,6 +489,136 @@ class XformExtractObjectToLinearFlow(Rule):
         yield tracker
 
 
+class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
+    """
+    This rule currently rewrites Where + Order By + Limit to a filtered vector
+    index scan. Because vector index only works for similarity search, the rule will
+    only be applied when the Order By is on Similarity expression.
+
+    Limit(10)
+        |
+    OrderBy(func)
+        |
+    Where (expression)  ->        IndexScan(10)
+        |                               |
+        A                               A
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        orderby_pattern = Pattern(OperatorType.LOGICALORDERBY)
+        where_pattern = Pattern(OperatorType.LOGICALFILTER)
+        where_pattern.append_child(Pattern(OperatorType.DUMMY))
+        orderby_pattern.append_child(where_pattern)
+        pattern.append_child(orderby_pattern)
+        super().__init__(
+            RuleType.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN,
+            pattern,
+        )
+
+        # Entries populate after rule eligibility validation.
+        self._index_catalog_entry = None
+        self._query_func_expr = None
+
+    def promise(self):
+        return (
+            Promise.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN
+        )
+
+    def check(self, before: LogicalLimit, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        catalog_manager = context.db.catalog
+
+        # Get corresponding nodes.
+        limit_node = before
+        orderby_node = before.children[0]
+        where_node = orderby_node.children[0]
+        sub_tree_root = where_node.children[0]
+
+        # Check that there is table in query
+        if not isinstance(sub_tree_root.opr, LogicalGet):
+            return
+
+        # Check if orderby runs on similarity expression.
+        # Current optimization will only accept Similarity expression.
+        func_orderby_expr = None
+        for column, sort_type in orderby_node.orderby_list:
+            if (
+                isinstance(column, FunctionExpression)
+                and sort_type == ParserOrderBySortType.ASC
+            ):
+                func_orderby_expr = column
+        if not func_orderby_expr or func_orderby_expr.name != "Similarity":
+            return
+
+        # Check if there exists an index on table and column.
+        query_func_expr, base_func_expr = func_orderby_expr.children
+
+        # Get table and column of orderby.
+        tv_expr = base_func_expr
+        while not isinstance(tv_expr, TupleValueExpression):
+            tv_expr = tv_expr.children[0]
+
+        # Get column catalog entry and function_signature.
+        column_catalog_entry = tv_expr.col_object
+
+        # Get function_signature.
+        function_signature = (
+            None
+            if isinstance(base_func_expr, TupleValueExpression)
+            else base_func_expr.signature()
+        )
+
+        # Get index catalog. Check if an index exists for matching
+        # function signature and table columns. Also check if vector store
+        # supports hybrid search
+        index_catalog_entry = (
+            catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
+                column_catalog_entry, function_signature
+            )
+        )
+        if not index_catalog_entry:
+            return
+
+        if not supports_hybrid_search(index_catalog_entry.type):
+            return
+
+        # Expression to perform filtering on
+        filter_expr = where_node.predicate
+
+        def get_columns_used_by_filter_expr(curr_expr: AbstractExpression) -> set[str]:
+            if isinstance(curr_expr, TupleValueExpression):
+                return set([curr_expr.name])
+            else:
+                curr_column_set = set()
+                for next_expr in curr_expr.children:
+                    curr_column_set.update(get_columns_used_by_filter_expr(next_expr))
+                return curr_column_set
+
+        # Check that there are no non included columns in filtered expression
+        filter_column_names = get_columns_used_by_filter_expr(filter_expr)
+        included_column_names = set(
+            [
+                entry.name
+                for entry in index_catalog_entry.include_columns
+                + [index_catalog_entry.feat_column]
+            ]
+        )
+
+        if len(filter_column_names.difference(included_column_names)) > 0:
+            return
+
+        # Construct the Vector index scan plan (with filter condition).
+        vector_index_scan_node = LogicalVectorIndexScan(
+            index_catalog_entry, limit_node.limit_count, query_func_expr, filter_expr
+        )
+        for child in orderby_node.children:
+            vector_index_scan_node.append_child(child)
+        yield vector_index_scan_node
+
+
 class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
     """
     This rule currently rewrites Order By + Limit to a vector index scan.
@@ -831,6 +963,7 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.if_not_exists,
             before.table_ref,
             before.col_list,
+            before.include_list,
             before.vector_store_type,
             before.project_expr_list,
             before.index_def,
@@ -1300,6 +1433,7 @@ class LogicalVectorIndexScanToPhysical(Rule):
             before.index,
             before.limit_count,
             before.search_query_expr,
+            before.filter_expr,
         )
         for child in before.children:
             after.append_child(child)
