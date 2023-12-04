@@ -161,3 +161,16 @@ class JobCatalogService(BaseService):
             job._next_scheduled_run = next_scheduled_run
             job._active = active
             self.session.commit()
+            
+    def get_all_job_names(self) -> list:
+        """Get the list of names of all jobs
+        Arguments:
+            None
+        Returns:
+            Returns the list of names of all jobs
+        """
+        entries = self.session.execute(
+            select(self.model._name)
+        ).scalars().all()
+        return entries
+        

@@ -109,7 +109,7 @@ class CreateJobExecutor(AbstractExecutor):
         start_time = (
             self._parse_datetime_str(self.node.start_time)
             if self.node.start_time is not None
-            else datetime.datetime.now()
+            else datetime.now()
         )
         end_time = (
             self._parse_datetime_str(self.node.end_time)

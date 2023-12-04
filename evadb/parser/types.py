@@ -73,6 +73,7 @@ class ShowType(EvaDBEnum):
     TABLES  # noqa: F821
     CONFIGS  # noqa: F821
     DATABASES  # noqa: F821
+    JOBS # noqa: F821
 
 
 class FunctionType(EvaDBEnum):

@@ -197,7 +197,7 @@ describe_statement: DESCRIBE table_name
     
 help_statement: HELP STRING_LITERAL
     
-show_statement: SHOW (FUNCTIONS | TABLES | uid | DATABASES)
+show_statement: SHOW (FUNCTIONS | TABLES | uid | DATABASES | JOBS)
 
 explain_statement: EXPLAIN explainable_statement
 
@@ -387,6 +387,7 @@ INDEX:                               "INDEX"i
 INSERT:                              "INSERT"i
 IS:                                  "IS"i
 JOB:                                 "JOB"i
+JOBS:                                "JOBS"i
 JOIN:                                "JOIN"i
 KEY:                                 "KEY"i
 LATERAL:                             "LATERAL"i
