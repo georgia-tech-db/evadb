@@ -16,8 +16,9 @@ import asyncio
 import multiprocessing
 
 import pandas
+import pickle
 
-from evadb.configuration.constants import EvaDB_DATABASE_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.database import EvaDBDatabase, init_evadb_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.functions.function_bootstrap_queries import init_builtin_functions
@@ -414,6 +415,30 @@ class EvaDBCursor(object):
             function_name, if_not_exists, impl_path, type, **kwargs
         )
         return EvaDBQuery(self._evadb, stmt)
+    
+    def create_simple_function(
+        self,
+        function_name: str,
+        function: callable,
+        if_not_exists: bool = True,
+    ) -> "EvaDBQuery":
+        """
+        Create a function in the database by passing in a function instance.
+
+        Args:
+            function_name (str): Name of the function to be created.
+            if_not_exists (bool): If True, do not raise an error if the function already exist. If False, raise an error.
+            function (callable): The function instance
+
+        Returns:
+            EvaDBQuery: The EvaDBQuery object representing the function created.
+        """
+        impl_path = f"{EvaDB_ROOT_DIR}/simple_udfs/{function_name}"
+        f = open(impl_path, 'ab')
+        pickle.dump(function, f)
+        f.close()
+
+        return self.create_function(function_name, if_not_exists, impl_path)
 
     def create_table(
         self, table_name: str, if_not_exists: bool = True, columns: str = None, **kwargs
