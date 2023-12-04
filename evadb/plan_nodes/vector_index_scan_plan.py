@@ -57,7 +57,7 @@ class VectorIndexScanPlan(AbstractPlan):
     def __str__(self):
         return "VectorIndexScan(index_name={}, vector_store_type={}, limit_count={}, search_query_expr={})".format(
             self._index.name,
-            self._index.vector_store_type,
+            self._index.type,
             self._limit_count,
             self._search_query_expr,
         )
