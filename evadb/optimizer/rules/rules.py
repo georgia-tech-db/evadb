@@ -78,6 +78,7 @@ from evadb.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalUpdate,
     LogicalVectorIndexScan,
     Operator,
     OperatorType,
@@ -99,6 +100,7 @@ from evadb.plan_nodes.rename_plan import RenamePlan
 from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 from evadb.plan_nodes.storage_plan import StoragePlan
 from evadb.plan_nodes.union_plan import UnionPlan
+from evadb.plan_nodes.update_plan import UpdatePlan
 from evadb.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
 
 ##############################################
@@ -1303,6 +1305,22 @@ class LogicalVectorIndexScanToPhysical(Rule):
         )
         for child in before.children:
             after.append_child(child)
+        yield after
+        
+        
+class LogicalUpdateToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_UPDATE)
+        super().__init__(RuleType.LOGICAL_UPDATE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UPDATE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalInsert, context: OptimizerContext):
+        after = UpdatePlan(before.table, before.column_list, before.value_list, before.where_clause)
         yield after
 
 
