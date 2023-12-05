@@ -83,6 +83,9 @@ class UserDefinedFunction(AbstractFunction):
 
         return out_df
 
-    def __init__(self, inner_func: callable, **kwargs):
-        self._func = inner_func
-        super().__init__()
+
+def generate_udf(func):
+    class_body = {
+        "_func": staticmethod(func),
+    }
+    return type(func.__name__, (UserDefinedFunction,), class_body)

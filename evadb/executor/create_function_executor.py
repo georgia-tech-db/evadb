@@ -40,7 +40,6 @@ from evadb.configuration.constants import (
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.functions.decorators.utils import load_io_from_function_decorators
-from evadb.functions.helpers.udf import UserDefinedFunction
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
 from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
@@ -853,8 +852,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             # loading the function class from the file
             function = load_function_class_from_file(impl_path, self.node.name)
             # initializing the function class calls the setup method internally
-            if not isinstance(function, UserDefinedFunction):
-                function(**function_args)
+            function(**function_args)
         except Exception as e:
             err_msg = f"Error creating function {self.node.name}: {str(e)}"
             # logger.error(err_msg)

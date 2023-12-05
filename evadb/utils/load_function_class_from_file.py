@@ -16,7 +16,7 @@ import importlib
 import inspect
 from pathlib import Path
 
-from evadb.functions.helpers.udf import UserDefinedFunction
+from evadb.functions.helpers.udf import generate_udf
 
 
 def load_function_class_from_file(filepath, classname=None):
@@ -57,7 +57,7 @@ def load_function_class_from_file(filepath, classname=None):
     if classname and hasattr(module, classname):
         obj = getattr(module, classname)
         if not inspect.isclass(obj):
-            return UserDefinedFunction(obj)
+            return generate_udf(obj)
         return obj
 
     # If class name not specified, check if there is only one class in the file
@@ -73,7 +73,7 @@ def load_function_class_from_file(filepath, classname=None):
             if obj.__module__ == module.__name__
         ]
         if len(functions) == 1:
-            return UserDefinedFunction(functions[0])
+            return generate_udf(functions[0])
         raise ImportError(
             f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the function with the same name in the CREATE query."
         )
