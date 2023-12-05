@@ -22,10 +22,10 @@ from evadb.readers.decord_reader import DecordReader
 from evadb.utils.generic_utils import (
     generate_file_path,
     is_gpu_available,
-    load_function_class_from_file,
     str_to_class,
     validate_kwargs,
 )
+from evadb.utils.load_function_class_from_file import load_function_class_from_file
 
 
 class ModulePathTest(unittest.TestCase):
