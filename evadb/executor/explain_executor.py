@@ -19,7 +19,8 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.explain_plan import ExplainPlan
-
+from evadb.configuration import constants
+from evadb.executor.cost_estimator import CostEstimator
 
 class ExplainExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: ExplainPlan):
@@ -29,7 +30,11 @@ class ExplainExecutor(AbstractExecutor):
         # Traverse optimized physical plan, which is commonly supported.
         # Logical plan can be also printed by passing explainable_opr
         # attribute of the node, but is not done for now.
+        cost_estimated = CostEstimator(self._db, self._node.children[0]).get_execution_cost(
+                False, False
+        )
         plan_str = self._exec(self._node.children[0], 0)
+        plan_str += "estimated rows accessed: " + str(cost_estimated)
         yield Batch(pd.DataFrame([plan_str]))
 
     def _exec(self, node: AbstractPlan, depth: int):
