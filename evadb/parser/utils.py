@@ -189,6 +189,12 @@ def parse_sql_orderby_expr(expr: str):
     assert isinstance(stmt, SelectStatement), "Expected a select statement"
     return stmt.orderby_list
 
+def parse_sql_string_agg_expr(expr: str):
+    mock_query = f"SELECT STRING_AGG({expr}) FROM DUMMY;"
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, SelectStatement), "Expected a select statement"
+    return stmt.string_agg_list
+
 
 def parse_rename(old_name: str, new_name: str):
     mock_query = f"RENAME TABLE {old_name} TO {new_name};"

@@ -30,6 +30,7 @@ class PlanOprType(Enum):
     LOAD_DATA = auto()
     UNION = auto()
     GROUP_BY = auto()
+    STRING_AGG = auto()
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()

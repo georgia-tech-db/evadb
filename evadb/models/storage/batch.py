@@ -209,6 +209,39 @@ class Batch:
             by, ascending=sort_type, ignore_index=True, inplace=True
         )
 
+    def join_columns_for_agg(self, by, column_strings, batch_list: Iterable[Batch]) -> None:
+        """
+        joins columns for aggregation
+
+        Args:
+            by: list of column names
+        """
+
+        assert by is not None
+        for column in by:
+            assert (
+                column.col_alias in self._frames.columns
+            ), "Can not join columns for agg in non-projected column: {}".format(column)
+        
+        frames = list([batch.frames for batch in batch_list])
+        count = 0
+        for frame in frames:
+            for column in column_strings:
+                if isinstance(column, str):
+                    if "combined" in frame:
+                        if column in frame:
+                            frames[count]["combined"] = frames[count]["combined"] + frames[count][column].astype(str)
+                        else:
+                            frames[count]["combined"] = frames[count]["combined"] + column
+                    else:
+                        if column in frame:
+                            frames[count]["combined"] = frames[count][column].astype(str)
+                        else:
+                            frames[count]["combined"] = column
+            count += 1
+        self._frames = frames
+        return frames
+
     def invert(self) -> None:
         self._frames = ~self._frames
 
@@ -310,6 +343,25 @@ class Batch:
         return Batch(frame)
 
     @classmethod
+    def string_agg(cls, separator: str, frames: List[pd.DataFrame], copy=True) -> Batch:
+        """Concat a list of joined column values with a separator.
+        Notice: only frames are considered.
+        """
+
+        # pd.concat will convert generator into list, so it does not hurt
+        # if we convert ourselves.
+        if len(frames) == 0:
+            return Batch()
+        count = 0
+        for frame in frames:
+            stringagg = separator.join(list(frames[count]["combined"].astype(str)))
+            print(separator.join(list(frames[count]["combined"].astype(str))))
+            frames[count]["string_agg"] = stringagg
+            count += 1
+        frame = pd.concat(frames, ignore_index=True, copy=copy)
+        return Batch(frame)
+
+    @classmethod
     def stack(cls, batch: Batch, copy=True) -> Batch:
         """Stack a given batch along the 0th dimension.
         Notice: input assumed to contain only one column with video frames
@@ -369,7 +421,7 @@ class Batch:
     def aggregate(self, method: str) -> None:
         """
         Aggregate batch based on method.
-        Methods can be sum, count, min, max, mean
+        Methods can be sum, count, min, max, mean, string_agg
 
         Arguments:
             method: string with one of the five above options

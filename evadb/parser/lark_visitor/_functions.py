@@ -134,6 +134,8 @@ class Functions:
             agg_func_type = ExpressionType.AGGREGATION_LAST
         elif agg_func_name == "SEGMENT":
             agg_func_type = ExpressionType.AGGREGATION_SEGMENT
+        elif agg_func_name == "STRING_AGG":
+            agg_func_type = ExpressionType.AGGREGATION_STRING_AGG
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):

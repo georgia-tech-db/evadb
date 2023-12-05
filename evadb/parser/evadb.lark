@@ -139,6 +139,8 @@ order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
 
 order_by_expression: expression sort_order?
 
+string_agg_clause: STRING_AGG "(" string_agg_function_arg "," string_literal ("," order_by_clause)? ")"
+
 sort_order: ASC | DESC
 
 // Forcing EXPLICIT JOIN KEYWORD
@@ -297,6 +299,7 @@ or_replace: OR REPLACE
 
 function_call: function         ->function_call           
     | aggregate_windowed_function   ->aggregate_function_call
+    | string_agg_clause -> string_agg_function_call
 
 function: simple_id "(" (STAR | function_args)? ")" dotted_id?
     
@@ -309,6 +312,8 @@ aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT
 function_args: (function_arg) ("," function_arg)*
     
 function_arg: constant | expression
+
+string_agg_function_arg: constant | expression (CONCAT_OP (constant | expression))*
 
 //    Expressions, predicates
 
@@ -488,6 +493,7 @@ FCOUNT: 						     "FCOUNT"i
 FIRST:                               "FIRST"i
 LAST:                                "LAST"i
 SEGMENT:                             "SEGMENT"i
+STRING_AGG:                          "STRING_AGG"i
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID
@@ -573,6 +579,7 @@ SINGLE_QUOTE_SYMB:                   "\""
 DOUBLE_QUOTE_SYMB:                   "\"\""
 REVERSE_QUOTE_SYMB:                  "`"
 COLON_SYMB:                          ":"
+CONCAT_OP:                           "||"
 
 // Literal Primitives
 

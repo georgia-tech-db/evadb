@@ -58,6 +58,7 @@ class OperatorType(IntEnum):
     LOGICALJOIN = auto()
     LOGICALFUNCTIONSCAN = auto()
     LOGICAL_SHOW = auto()
+    LOGICAL_STRING_AGG = auto()
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
@@ -328,6 +329,8 @@ class LogicalProject(Operator):
         return is_subtree_equal and self.target_list == other.target_list
 
     def __hash__(self) -> int:
+        if isinstance(self.target_list[0], List):
+            return hash((super().__hash__(), tuple(self.target_list[0])))
         return hash((super().__hash__(), tuple(self.target_list)))
 
 
@@ -368,6 +371,26 @@ class LogicalOrderBy(Operator):
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.orderby_list)))
 
+class LogicalStringAgg(Operator):
+    def __init__(self, string_agg_list: List, children: List = None):
+        super().__init__(OperatorType.LOGICAL_STRING_AGG, children)
+        self._string_agg_list = string_agg_list
+
+    @property
+    def string_agg_list(self):
+        return self._string_agg_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalStringAgg):
+            return False
+        return is_subtree_equal and self.string_agg_list == other.string_agg_list
+
+    def __hash__(self) -> int:
+        if isinstance(self.string_agg_list[0], List):
+            return hash((super().__hash__(), tuple(self.string_agg_list[0])))
+        else:
+            return hash((super().__hash__(), tuple(self.string_agg_list)))
 
 class LogicalLimit(Operator):
     def __init__(self, limit_count: ConstantValueExpression, children: List = None):

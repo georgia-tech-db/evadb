@@ -14,7 +14,7 @@
 # limitations under the License.
 from functools import singledispatchmethod
 from typing import Callable
-
+from typing import List
 from evadb.binder.binder_utils import (
     BinderError,
     bind_table_info,
@@ -31,6 +31,7 @@ from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import is_document_table
 from evadb.catalog.sql_config import RESTRICTED_COL_NAMES
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_function_statement import CreateFunctionStatement
@@ -43,6 +44,7 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.utils.generic_utils import string_comparison_case_insensitive
+from lark.lexer import Token
 
 
 class StatementBinder:
@@ -166,13 +168,36 @@ class StatementBinder:
                 and node.target_list[0].name == "*"
             ):
                 node.target_list = extend_star(self._binder_context)
-            for expr in node.target_list:
-                self.bind(expr)
-                if isinstance(expr, FunctionExpression):
-                    output_cols = get_bound_func_expr_outputs_as_tuple_value_expr(expr)
-                    self._binder_context.add_derived_table_alias(
-                        expr.alias.alias_name, output_cols
-                    )
+
+            
+            if isinstance(node.target_list, List) and isinstance(node.target_list[0], List) and node.target_list[0][0] == "STRING_AGG":
+                if not isinstance(node.target_list[0][1], List):
+                    node.string_agg_list = node.target_list[0][1:]
+                    node.target_list = [node.target_list[0][1]] + [TupleValueExpression(name="string_agg", col_alias="string_agg", table_alias=node.target_list[0][1].table_alias)]
+                else:
+                    parsed = []
+                    table_alias = ""
+                    for item in node.target_list[0][1]:
+                        if isinstance(item, Token):
+                            continue
+                        elif isinstance(item, TupleValueExpression):
+                            table_alias = item.table_alias
+                            parsed.append(item)
+                        else:
+                            parsed.append(item)
+                    newList = parsed + [node.target_list[0][2]]
+                    node.string_agg_list = [parsed] + [node.target_list[0][2]]
+                    node.target_list = parsed + [TupleValueExpression(name="string_agg", col_alias="string_agg", table_alias=table_alias)]
+                for expr in newList:
+                    self.bind(expr)
+            else:
+                for expr in node.target_list:
+                    self.bind(expr)
+                    if isinstance(expr, FunctionExpression):
+                        output_cols = get_bound_func_expr_outputs_as_tuple_value_expr(expr)
+                        self._binder_context.add_derived_table_alias(
+                            expr.alias.alias_name, output_cols
+                        )
 
         if node.groupby_clause:
             self.bind(node.groupby_clause)
@@ -181,6 +206,9 @@ class StatementBinder:
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])
+        # if node.string_agg_list:
+        #     for expr in node.string_agg_list:
+        #         self.bind(expr[0])
         if node.union_link:
             current_context = self._binder_context
             self._binder_context = StatementBinderContext(self._catalog)

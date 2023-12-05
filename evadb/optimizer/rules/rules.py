@@ -77,6 +77,7 @@ from evadb.optimizer.operators import (
     LogicalRename,
     LogicalSample,
     LogicalShow,
+    LogicalStringAgg,
     LogicalUnion,
     LogicalVectorIndexScan,
     Operator,
@@ -95,6 +96,7 @@ from evadb.plan_nodes.lateral_join_plan import LateralJoinPlan
 from evadb.plan_nodes.limit_plan import LimitPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
 from evadb.plan_nodes.orderby_plan import OrderByPlan
+from evadb.plan_nodes.string_agg_plan import StringAggPlan
 from evadb.plan_nodes.rename_plan import RenamePlan
 from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 from evadb.plan_nodes.storage_plan import StoragePlan
@@ -1025,6 +1027,25 @@ class LogicalOrderByToPhysical(Rule):
 
     def apply(self, before: LogicalOrderBy, context: OptimizerContext):
         after = OrderByPlan(before.orderby_list)
+        for child in before.children:
+            after.append_child(child)
+        yield after
+        
+
+class LogicalStringAggToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_STRING_AGG)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_STRING_AGG_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_STRING_AGG_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalStringAgg, context: OptimizerContext):
+        after = StringAggPlan(before.string_agg_list)
         for child in before.children:
             after.append_child(child)
         yield after
