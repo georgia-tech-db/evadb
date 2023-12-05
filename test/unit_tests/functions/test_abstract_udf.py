@@ -21,7 +21,7 @@ from test.util import get_all_subclasses, get_mock_object
 import evadb
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.abstract.hf_abstract_function import AbstractHFFunction
-from evadb.functions.helpers.udf import UserDefinedFunction
+from evadb.functions.helpers.udf import UserDefinedFunction, generate_udf
 from evadb.functions.yolo_object_detector import Yolo
 
 
@@ -39,7 +39,7 @@ class AbstractFunctionTest(unittest.TestCase):
                 def temp_fun(x: int) -> int:
                     return x
 
-                dummy_object = UserDefinedFunction(temp_fun)
+                dummy_object = generate_udf(temp_fun)()
                 self.assertTrue(str(dummy_object.name) is not None)
                 continue
 
