@@ -39,7 +39,7 @@ parts:
 
   - caption: User Reference
     chapters:
-      - file: source/reference/evaql      
+      - file: source/reference/evaql
         title: Query Language
         sections:
           - file: source/reference/evaql/load_csv
@@ -65,25 +65,26 @@ parts:
 
       - file: source/reference/api
         title: Python API
-      
+
       - file: source/reference/rest_api
         title: REST API
 
       - file: source/reference/databases/index
         title: Data Sources
-        sections: 
+        sections:
           - file: source/reference/databases/postgres
           - file: source/reference/databases/sqlite
           - file: source/reference/databases/mysql
           - file: source/reference/databases/mariadb
           - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
+          - file: source/reference/databases/arxiv
           - file: source/reference/databases/snowflake
           - file: source/reference/databases/hackernews
 
       - file: source/reference/vector_databases/index
         title: Vector Databases
-        sections: 
+        sections:
           - file: source/reference/vector_databases/faiss
           - file: source/reference/vector_databases/chromadb
           - file: source/reference/vector_databases/qdrant
@@ -106,9 +107,9 @@ parts:
           - file: source/reference/ai/hf
             title: Hugging Face
           - file: source/reference/ai/openai
-            title: OpenAI 
+            title: OpenAI
           - file: source/reference/ai/yolo
-            title: YOLO 
+            title: YOLO
           - file: source/reference/ai/stablediffusion
             title: Stable Diffusion
 
@@ -117,7 +118,7 @@ parts:
 
       - file: source/reference/optimizations
         title: Optimizations
-        
+
       # - file: source/reference/io
       #   title: IO Descriptors
 
