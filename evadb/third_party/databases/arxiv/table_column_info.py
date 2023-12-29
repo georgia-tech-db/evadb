@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARXIV_COLUMNS=[
-    ["title",str],
-    ["entry_id",str],
-    ["published",str],
-    ["updated",str],
-    ["summary",str],
-    ["authors",object],
-    ["comment",str],
-    ["primary_category",str],
-    ["journal_ref",str],
-    ["doi",str],
+ARXIV_COLUMNS = [
+    ["title", str],
+    ["entry_id", str],
+    ["published", str],
+    ["updated", str],
+    ["summary", str],
+    ["authors", object],
+    ["comment", str],
+    ["primary_category", str],
+    ["journal_ref", str],
+    ["doi", str],
 ]

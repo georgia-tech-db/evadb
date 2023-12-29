@@ -49,7 +49,7 @@ def _get_database_handler(engine: str, **kwargs):
     elif engine == "github":
         return mod.GithubHandler(engine, **kwargs)
     elif engine == "arxiv":
-        return mod.ArxivHandler(engine,**kwargs)
+        return mod.ArxivHandler(engine, **kwargs)
     elif engine == "hackernews":
         return mod.HackernewsSearchHandler(engine, **kwargs)
     elif engine == "slack":

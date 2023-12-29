@@ -32,16 +32,15 @@ class ArxivHandler(DBHandler):
             **kwargs: arbitrary keyword arguments for establishing the connection.
         """
         super().__init__(name, **kwargs)
-        self.query=kwargs.get("query","")
-        self.max_results=int(kwargs.get("max_results",0))
+        self.query = kwargs.get("query", "")
+        self.max_results = int(kwargs.get("max_results", 0))
 
     @property
     def supported_table(self):
         def _arxiv_generator():
-            for eachRow in self.connection.results(arxiv.Search(
-                query=self.query,
-                max_results=self.max_results
-            )):
+            for eachRow in self.connection.results(
+                arxiv.Search(query=self.query, max_results=self.max_results)
+            ):
                 yield {
                     property_name: getattr(eachRow, property_name)
                     for property_name, _ in ARXIV_COLUMNS
@@ -55,8 +54,6 @@ class ArxivHandler(DBHandler):
         }
         return mapping
 
-
-
     def connect(self):
         """
         Set up the connection required by the handler.
@@ -64,17 +61,17 @@ class ArxivHandler(DBHandler):
             DBHandlerStatus
         """
         try:
-            self.connection=arxiv.Client()
+            self.connection = arxiv.Client()
             return DBHandlerStatus(status=True)
         except Exception as e:
             return DBHandlerStatus(status=False, error=str(e))
-    
+
     def disconnect(self):
         """
         Close any existing connections.
         """
         pass
-        
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Check connection to the handler.
@@ -85,7 +82,7 @@ class ArxivHandler(DBHandler):
             return DBHandlerStatus(status=True)
         else:
             return DBHandlerStatus(status=False, error="Not connected to the database.")
-        
+
     def get_tables(self) -> DBHandlerResponse:
         """
         Return the list of tables in the database.
@@ -102,7 +99,7 @@ class ArxivHandler(DBHandler):
             return DBHandlerResponse(data=tables_df)
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))
-    
+
     def get_columns(self, table_name: str) -> DBHandlerResponse:
         """
         Returns the list of columns for the given table.
@@ -120,8 +117,6 @@ class ArxivHandler(DBHandler):
             return DBHandlerResponse(data=columns_df)
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))
-        
-
 
     def select(self, table_name: str) -> DBHandlerResponse:
         """
@@ -146,4 +141,3 @@ class ArxivHandler(DBHandler):
             )
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))
-        
