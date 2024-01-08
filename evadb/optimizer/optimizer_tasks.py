@@ -287,14 +287,14 @@ class OptimizeInputs(OptimizerTask):
         super().__init__(optimizer_context, OptimizerTaskType.OPTIMIZE_INPUTS)
 
     def execute(self):
-        cost = 0
+        child_cost = []
         memo = self.optimizer_context.memo
         grp = memo.get_group_by_id(self.root_expr.group_id)
         for child_id in self.root_expr.children:
             child_grp = memo.get_group_by_id(child_id)
             if child_grp.get_best_expr(PropertyType.DEFAULT):
                 # Note: May never get hit when using EvaDB on Ray
-                cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT)
+                child_cost.append(child_grp.get_best_expr_cost(PropertyType.DEFAULT))
             else:
                 self.optimizer_context.task_stack.push(
                     OptimizeInputs(self.root_expr, self.optimizer_context)
@@ -304,8 +304,11 @@ class OptimizeInputs(OptimizerTask):
                 )
                 return
 
-        cost += self.optimizer_context.cost_model.calculate_cost(self.root_expr)
-        grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
+        root_cost = self.optimizer_context.cost_model.calculate_cost(
+            self.root_expr, child_cost
+        )
+        print((self.root_expr, root_cost))
+        grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, root_cost)
 
 
 # class ExploreGroup(OptimizerTask):
