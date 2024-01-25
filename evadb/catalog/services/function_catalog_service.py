@@ -100,6 +100,24 @@ class FunctionCatalogService(BaseService):
             return function_obj.as_dataclass()
         return None
 
+    def get_entries_by_type(self, function_type: str) -> List[FunctionCatalogEntry]:
+        """returns the function entries that matches the type provided.
+           Empty list if no such entry found.
+
+        Arguments:
+            type (str): name to be searched
+        """
+
+        entries = (
+            self.session.execute(
+                select(self.model).filter(self.model._type == function_type)
+            )
+            .scalars()
+            .all()
+        )
+
+        return [entry.as_dataclass() for entry in entries]
+
     def get_entry_by_id(self, id: int, return_alchemy=False) -> FunctionCatalogEntry:
         """return the function entry that matches the id provided.
            None if no such entry found.

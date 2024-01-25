@@ -515,6 +515,20 @@ class CatalogManager(object):
         """
         return self._function_service.get_entry_by_name(name)
 
+    def get_function_catalog_entries_by_type(
+        self, type: str
+    ) -> List[FunctionCatalogEntry]:
+        """
+        Get function information based on type.
+
+        Arguments:
+             type (str): type of the function
+
+        Returns:
+            List of FunctionCatalogEntry object
+        """
+        return self._function_service.get_entries_by_type(type)
+
     def delete_function_catalog_entry_by_name(self, function_name: str) -> bool:
         return self._function_service.delete_entry_by_name(function_name)
 
