@@ -38,3 +38,4 @@ DEFAULT_TRAIN_REGRESSION_METRIC = "rmse"
 DEFAULT_XGBOOST_TASK = "regression"
 DEFAULT_SKLEARN_TRAIN_MODEL = "rf"
 SKLEARN_SUPPORTED_MODELS = ["rf", "extra_tree", "kneighbor"]
+TRAINING_FRAMEWORKS = ["Sklearn", "Ludwig", "XGBoost", "Forecasting"]
