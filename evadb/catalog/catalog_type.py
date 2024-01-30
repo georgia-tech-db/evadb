@@ -119,6 +119,7 @@ class VectorStoreType(EvaDBEnum):
     CHROMADB  # noqa: F821
     WEAVIATE  # noqa: F821
     MILVUS  # noqa: F821
+    MARQO  # noqa: F821
 
 
 class VideoColumnName(EvaDBEnum):
