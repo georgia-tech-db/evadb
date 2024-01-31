@@ -593,6 +593,16 @@ def try_to_import_milvus_client():
         )
 
 
+def try_to_import_marqo_client():
+    try:
+        import marqo  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import marqo python package.
+            Please install it with `pip install marqo`."""
+        )
+
+
 def is_qdrant_available() -> bool:
     try:
         try_to_import_qdrant_client()
@@ -628,6 +638,14 @@ def is_weaviate_available() -> bool:
 def is_milvus_available() -> bool:
     try:
         try_to_import_milvus_client()
+        return True
+    except ValueError:
+        return False
+
+
+def is_marqo_available() -> bool:
+    try:
+        try_to_import_marqo_client()
         return True
     except ValueError:
         return False

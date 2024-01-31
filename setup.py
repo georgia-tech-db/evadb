@@ -116,6 +116,8 @@ weaviate_libs = ["weaviate-client"]
 
 milvus_libs = ["pymilvus>=2.3.0"]
 
+marqo_libs = ["marqo"]
+
 
 postgres_libs = [
     "psycopg2",
@@ -177,6 +179,7 @@ EXTRA_REQUIRES = {
     "chromadb": chromadb_libs,
     "milvus": milvus_libs,
     "weaviate": weaviate_libs,
+    "marqo": marqo_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "sklearn": sklearn_libs,

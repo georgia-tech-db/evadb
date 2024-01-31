@@ -304,6 +304,8 @@ class CreateIndex:
             vector_store_type = VectorStoreType.WEAVIATE
         elif str.upper(token) == "MILVUS":
             vector_store_type = VectorStoreType.MILVUS
+        elif str.upper(token) == "MARQO":
+            vector_store_type = VectorStoreType.MARQO
         return vector_store_type
 
 
