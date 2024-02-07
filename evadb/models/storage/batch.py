@@ -77,6 +77,26 @@ class Batch:
         return cls(frames=obj["frames"])
 
     @classmethod
+    def from_add(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1.to_numpy() + batch2.to_numpy()))
+
+    @classmethod
+    def from_subtract(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1.to_numpy() - batch2.to_numpy()))
+
+    @classmethod
+    def from_multiply(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1.to_numpy() * batch2.to_numpy()))
+
+    @classmethod
+    def from_divide(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1.to_numpy() / batch2.to_numpy()))
+
+    @classmethod
+    def from_modulus(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1.to_numpy() % batch2.to_numpy()))
+
+    @classmethod
     def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
         return Batch(pd.DataFrame(batch1.to_numpy() == batch2.to_numpy()))
 
