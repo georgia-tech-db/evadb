@@ -17,6 +17,7 @@ from lark import Tree
 
 from evadb.catalog.catalog_type import ColumnType
 from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.arithmetic_expression import ArithmeticExpression
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.logical_expression import LogicalExpression
@@ -59,6 +60,28 @@ class Expressions:
                     return ConstantValueExpression(decimal_literal, ColumnType.INTEGER)
 
         return self.visit_children(tree)
+
+    def arithmetic_expression_atom(self, tree):
+        left = self.visit(tree.children[0])
+        op = self.visit(tree.children[1])
+        right = self.visit(tree.children[2])
+        return ArithmeticExpression(op, left, right)
+
+    def div_mul_mod_operator(self, tree):
+        op = str(tree.children[0])
+        if op == "*":
+            return ExpressionType.ARITHMETIC_MULTIPLY
+        elif op == "/":
+            return ExpressionType.ARITHMETIC_DIVIDE
+        elif op == "%":
+            return ExpressionType.ARITHMETIC_MODULUS
+
+    def add_sub_operator(self, tree):
+        op = str(tree.children[0])
+        if op == "+":
+            return ExpressionType.ARITHMETIC_ADD
+        elif op == "-":
+            return ExpressionType.ARITHMETIC_SUBTRACT
 
     def logical_expression(self, tree):
         left = self.visit(tree.children[0])

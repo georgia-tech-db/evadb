@@ -45,6 +45,7 @@ class ExpressionType(IntEnum):
     ARITHMETIC_SUBTRACT = auto()
     ARITHMETIC_MULTIPLY = auto()
     ARITHMETIC_DIVIDE = auto()
+    ARITHMETIC_MODULUS = auto()
 
     FUNCTION_EXPRESSION = auto()
 

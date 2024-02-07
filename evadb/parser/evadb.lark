@@ -321,7 +321,13 @@ predicate: predicate NOT? IN "(" (select_statement | expressions) ")"  ->in_pred
     | predicate comparison_operator predicate  -> binary_comparison_predicate 
     | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"   ->subquery_comparison_predicate
     | assign_var   ->expression_atom_predicate   
-    | expression_atom 
+    | arithmetic_expression
+
+arithmetic_expression:  product
+    | arithmetic_expression add_sub_operator product -> arithmetic_expression_atom
+
+product: expression_atom
+    | product div_mul_mod_operator expression_atom -> arithmetic_expression_atom
 
 assign_var.1: LOCAL_ID VAR_ASSIGN expression_atom  
 
@@ -332,8 +338,7 @@ expression_atom.2: constant       ->constant_expression_atom
     | unary_operator expression_atom   ->unary_expression_atom                               
     | "(" expression ("," expression)* ")"    ->nested_expression_atom                     
     | "(" select_statement ")" ->subquery_expession_atom                                       
-    | expression_atom bit_operator expression_atom   ->bit_expression_atom       
-    | expression_atom math_operator expression_atom 
+    | expression_atom bit_operator expression_atom   ->bit_expression_atom
 
 unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
     
@@ -343,7 +348,8 @@ logical_operator: AND | XOR | OR
     
 bit_operator: "<<" | ">>" | "&" | "^" | "|"
 
-math_operator: STAR | DIVIDE | MODULUS | DIV | MOD | PLUS | MINUS | MINUSMINUS
+div_mul_mod_operator:  DIVIDE | STAR | MODULUS 
+add_sub_operator: PLUS | MINUS
 
 // KEYWORDS
 
@@ -526,7 +532,7 @@ OR_ASSIGN:                           "|="
 
 STAR:                                "*"
 DIVIDE:                              "/"
-MODULUS:                              "%"
+MODULUS:                             "%"
 PLUS:                                "+"
 MINUSMINUS:                          "--"
 MINUS:                               "-"
