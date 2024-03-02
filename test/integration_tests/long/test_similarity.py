@@ -147,9 +147,9 @@ class SimilarityTests(unittest.TestCase):
         self.original_weaviate_env = os.environ.get("WEAVIATE_API_URL")
 
         os.environ["WEAVIATE_API_KEY"] = "NM4adxLmhtJDF1dPXDiNhEGTN7hhGDpymmO0"
-        os.environ[
-            "WEAVIATE_API_URL"
-        ] = "https://cs6422-test2-zn83syib.weaviate.network"
+        os.environ["WEAVIATE_API_URL"] = (
+            "https://cs6422-test2-zn83syib.weaviate.network"
+        )
 
     def tearDown(self):
         shutdown_ray()

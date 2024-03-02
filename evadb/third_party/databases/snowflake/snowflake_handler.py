@@ -25,7 +25,6 @@ from evadb.third_party.databases.types import (
 
 
 class SnowFlakeDbHandler(DBHandler):
-
     """
     Class for implementing the SnowFlake DB handler as a backend store for
     EvaDB.
@@ -172,7 +171,7 @@ class SnowFlakeDbHandler(DBHandler):
             "BINARY": bytes,
             "DATE": datetime.date,
             "TIME": datetime.time,
-            "TIMESTAMP": datetime.datetime
+            "TIMESTAMP": datetime.datetime,
             # Add more mappings as needed
         }
 

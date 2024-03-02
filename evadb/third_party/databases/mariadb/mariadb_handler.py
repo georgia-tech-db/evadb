@@ -23,7 +23,6 @@ from evadb.third_party.databases.types import (
 
 
 class MariaDbHandler(DBHandler):
-
     """
     Class for implementing the Maria DB handler as a backend store for
     EvaDB.

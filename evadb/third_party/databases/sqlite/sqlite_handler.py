@@ -125,9 +125,11 @@ class SQLiteHandler(DBHandler):
             res = cursor.fetchall()
             res_df = pd.DataFrame(
                 res,
-                columns=[desc[0].lower() for desc in cursor.description]
-                if cursor.description
-                else [],
+                columns=(
+                    [desc[0].lower() for desc in cursor.description]
+                    if cursor.description
+                    else []
+                ),
             )
             return res_df
         except sqlite3.ProgrammingError as e:

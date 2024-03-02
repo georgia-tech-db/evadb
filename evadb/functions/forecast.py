@@ -107,9 +107,11 @@ class ForecastModel(AbstractFunction):
             columns={
                 "unique_id": self.id_column_rename,
                 "ds": self.time_column_rename,
-                self.model_name
-                if self.library == "statsforecast"
-                else self.model_name + "-median": self.predict_column_rename,
+                (
+                    self.model_name
+                    if self.library == "statsforecast"
+                    else self.model_name + "-median"
+                ): self.predict_column_rename,
                 self.model_name
                 + "-lo-"
                 + str(self.conf): self.predict_column_rename

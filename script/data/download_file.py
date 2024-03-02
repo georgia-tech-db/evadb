@@ -6,18 +6,16 @@ from tqdm import tqdm
 
 # map file names to their corresponding google drive ids
 file_id_map = {
-
     # datasets
-    "bddtest" : "1XDkcJ0eh7ov1r5pm7AsVfCahTQaAJ9sn",
-
+    "bddtest": "1XDkcJ0eh7ov1r5pm7AsVfCahTQaAJ9sn",
     # models
-    "vehicle_make_predictor" : "1pM3FFlSMWhZ4LYpdL2tNRvofUKzifzZe"
-    
+    "vehicle_make_predictor": "1pM3FFlSMWhZ4LYpdL2tNRvofUKzifzZe",
 }
+
 
 def download_file_from_google_drive(file_name, destination):
     """
-    Downloads a zip file from google drive. Assumes the file has open access. 
+    Downloads a zip file from google drive. Assumes the file has open access.
     Args:
         file_name: name of the file to download
         destination: path to save the file to
@@ -30,14 +28,15 @@ def download_file_from_google_drive(file_name, destination):
 
     session = requests.Session()
 
-    response = session.get(URL, params = { 'id' : id }, stream = True)
+    response = session.get(URL, params={"id": id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = { 'id' : id, 'confirm' : token }
-        response = session.get(URL, params = params, stream = True)
+        params = {"id": id, "confirm": token}
+        response = session.get(URL, params=params, stream=True)
 
-    save_response_content(response, destination)    
+    save_response_content(response, destination)
+
 
 def get_confirm_token(response):
     """
@@ -47,25 +46,27 @@ def get_confirm_token(response):
     """
 
     for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
+        if key.startswith("download_warning"):
             return value
 
     return None
 
+
 def save_response_content(response, destination):
     """
-    Writes the content of the response to the destination. 
+    Writes the content of the response to the destination.
     Args:
         response: response object from the request
         destination: path to save the file to
     """
-    
+
     CHUNK_SIZE = 32768
 
     with open(destination, "wb") as f:
         for chunk in tqdm(response.iter_content(CHUNK_SIZE)):
-            if chunk: # filter out keep-alive new chunks
+            if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
+
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
