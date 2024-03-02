@@ -160,9 +160,11 @@ class OptimizerRulesTest(unittest.TestCase):
 
         # reordering if first predicate has higher cost
         _check_reorder(
-            lambda name: MagicMock(cost=10)
-            if name == "DummyMultiObjectDetector"
-            else MagicMock(cost=5)
+            lambda name: (
+                MagicMock(cost=10)
+                if name == "DummyMultiObjectDetector"
+                else MagicMock(cost=5)
+            )
         )
 
         # reordering if first predicate has no cost
@@ -194,16 +196,20 @@ class OptimizerRulesTest(unittest.TestCase):
 
         # no reordering if first predicate has lower cost
         _check_no_reorder(
-            lambda name: MagicMock(cost=10)
-            if name == "DummyMultiObjectDetector"
-            else MagicMock(cost=5)
+            lambda name: (
+                MagicMock(cost=10)
+                if name == "DummyMultiObjectDetector"
+                else MagicMock(cost=5)
+            )
         )
 
         # no reordering if both predicates have same cost
         _check_no_reorder(
-            lambda name: MagicMock(cost=5)
-            if name == "DummyMultiObjectDetector"
-            else MagicMock(cost=5)
+            lambda name: (
+                MagicMock(cost=5)
+                if name == "DummyMultiObjectDetector"
+                else MagicMock(cost=5)
+            )
         )
 
         # no reordering if default cost is used for one Function

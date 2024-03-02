@@ -228,3 +228,4 @@ eva/*
 blog.md
 
 tests/integration_tests/short/*.db
+test/third_party_tests/*.db

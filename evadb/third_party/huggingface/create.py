@@ -28,10 +28,9 @@ from evadb.third_party.huggingface.model import (
 )
 from evadb.utils.generic_utils import try_to_import_transformers
 
-"""
-We currently support the following tasks from HuggingFace.
-Each task is mapped to the type of input it expects.
-"""
+# == We currently support the following tasks from HuggingFace. ==
+# == Each task is mapped to the type of input it expects. ==
+
 INPUT_TYPE_FOR_SUPPORTED_TASKS = {
     "audio-classification": HFInputTypes.AUDIO,
     "automatic-speech-recognition": HFInputTypes.AUDIO,

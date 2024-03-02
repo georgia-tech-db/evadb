@@ -29,11 +29,13 @@ import pkg_resources
 
 background_loop = asyncio.new_event_loop()
 
+
 def background(f):
     def wrapped(*args, **kwargs):
         return background_loop.run_in_executor(None, f, *args, **kwargs)
 
     return wrapped
+
 
 # ==============================================
 # CONFIGURATION
@@ -210,7 +212,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
-            #LOG.info("Formatting File : " + file_path)
+            # LOG.info("Formatting File : " + file_path)
             # ISORT
             isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)
@@ -227,23 +229,27 @@ def format_file(file_path, add_header, strip_header, format_code):
 
             # PYLINT
             pylint_command = f"{PYLINT_BINARY} --spelling-private-dict-file {ignored_words_file} --rcfile={PYLINTRC}  {file_path}"
-            #LOG.warning(pylint_command)
-            #ret_val = os.system(pylint_command)
-            #if ret_val:
+            # LOG.warning(pylint_command)
+            # ret_val = os.system(pylint_command)
+            # if ret_val:
             #    sys.exit(1)
 
             # CHECK FOR INVALID WORDS (like print)
-            with open(file_path, 'r') as file:
+            with open(file_path, "r") as file:
                 for line_num, line in enumerate(file, start=1):
-                    if file_path not in IGNORE_PRINT_FILES and ' print(' in line:
-                        LOG.warning(f"print() found in {file_path}, line {line_num}: {line.strip()}")
-                        sys.exit(1)                        
+                    if file_path not in IGNORE_PRINT_FILES and " print(" in line:
+                        LOG.warning(
+                            f"print() found in {file_path}, line {line_num}: {line.strip()}"
+                        )
+                        sys.exit(1)
 
     # END WITH
 
     fd.close()
 
+
 # END FORMAT__FILE(FILE_NAME)
+
 
 # check the notebooks
 def check_notebook_format(notebook_file):
@@ -264,16 +270,18 @@ def check_notebook_format(notebook_file):
 
     # Check that all cells have a valid cell type (code, markdown, or raw)
     for cell in nb.cells:
-        if cell.cell_type not in ['code', 'markdown', 'raw']:
-            LOG.error(f"ERROR: Notebook {notebook_file} contains an invalid cell type: {cell.cell_type}")
+        if cell.cell_type not in ["code", "markdown", "raw"]:
+            LOG.error(
+                f"ERROR: Notebook {notebook_file} contains an invalid cell type: {cell.cell_type}"
+            )
             sys.exit(1)
 
     # Check that all code cells have a non-empty source code
     for cell in nb.cells:
-        if cell.cell_type == 'code' and not cell.source.strip():
+        if cell.cell_type == "code" and not cell.source.strip():
             LOG.error(f"ERROR: Notebook {notebook_file} contains an empty code cell")
             sys.exit(1)
-    
+
     # Check for "print(response)"
     # too harsh replaxing it
     # for cell in nb.cells:
@@ -284,7 +292,7 @@ def check_notebook_format(notebook_file):
     # Check for "Colab link"
     contains_colab_link = False
     for cell in nb.cells:
-        if cell.cell_type == 'markdown' and 'colab' in cell.source:
+        if cell.cell_type == "markdown" and "colab" in cell.source:
             # Check if colab link is correct
             # notebook_file_name must match colab link
             if notebook_file_name in cell.source:
@@ -292,7 +300,9 @@ def check_notebook_format(notebook_file):
                 break
 
     if contains_colab_link is False:
-        LOG.error(f"ERROR: Notebook {notebook_file} does not contain correct Colab link -- update the link.")
+        LOG.error(
+            f"ERROR: Notebook {notebook_file} does not contain correct Colab link -- update the link."
+        )
         sys.exit(1)
 
     return True
@@ -303,6 +313,7 @@ def check_notebook_format(notebook_file):
 
     import enchant
     from enchant.checker import SpellChecker
+
     chkr = SpellChecker("en_US")
 
     # Check spelling
@@ -312,7 +323,9 @@ def check_notebook_format(notebook_file):
         chkr.set_text(cell.source)
         for err in chkr:
             if err.word not in ignored_words:
-                LOG.warning(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
+                LOG.warning(
+                    f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}"
+                )
 
 
 # format all the files in the dir passed as argument
@@ -335,9 +348,10 @@ def format_dir(dir_path, add_header, strip_header, format_code):
 
 # END ADD_HEADERS_DIR(DIR_PATH)
 
+
 @background
 def check_file(file):
-    #print(file)
+    # print(file)
     valid = False
     # only format the default directories
     file_path = str(Path(file).absolute())
@@ -351,6 +365,7 @@ def check_file(file):
             format_file(file, False, True, False)
             format_file(file, True, False, False)
         format_file(file, False, False, True)
+
 
 # ==============================================
 # Main Function
@@ -388,7 +403,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--dir-name", help="directory containing files to be acted on"
     )
-    parser.add_argument("-k", "--spell-check", help="enable spelling check (off by default)")
+    parser.add_argument(
+        "-k", "--spell-check", help="enable spelling check (off by default)"
+    )
 
     args = parser.parse_args()
 
@@ -412,22 +429,18 @@ if __name__ == "__main__":
         )
     elif args.dir_name:
         LOG.info("Scanning directory " + "".join(args.dir_name))
-        format_dir(
-            args.dir_name, args.add_header, args.strip_header, args.format_code
-        )
+        format_dir(args.dir_name, args.add_header, args.strip_header, args.format_code)
     # BY DEFAULT, WE FIX THE MODIFIED FILES
     else:
         # LOG.info("Default fix modified files")
         MERGEBASE = subprocess.check_output(
-            "git merge-base origin/staging HEAD", 
-            shell=True, 
-            universal_newlines=True
+            "git merge-base origin/staging HEAD", shell=True, universal_newlines=True
         ).rstrip()
         files = (
             subprocess.check_output(
                 f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'",
                 shell=True,
-                universal_newlines=True
+                universal_newlines=True,
             )
             .rstrip()
             .split("\n")
@@ -438,7 +451,7 @@ if __name__ == "__main__":
 
     # CHECK ALL THE NOTEBOOKS
 
-    # Iterate over all files in the directory 
+    # Iterate over all files in the directory
     # and check if they are Jupyter notebooks
     for file in os.listdir(EvaDB_NOTEBOOKS_DIR):
         if file.endswith(".ipynb"):
@@ -451,39 +464,47 @@ if __name__ == "__main__":
         # GO OVER ALL DOCS
         # Install aspell
         # apt-get install aspell
-        
-        #LOG.info("ASPELL")
-        for elem in Path(EvaDB_DOCS_DIR).rglob('*.*'):
-            if elem.suffix == ".rst" or elem.suffix == ".yml":
-                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
-        os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
+        # LOG.info("ASPELL")
+        for elem in Path(EvaDB_DOCS_DIR).rglob("*.*"):
+            if elem.suffix == ".rst" or elem.suffix == ".yml":
+                os.system(
+                    f"aspell --lang=en --personal='{ignored_words_file}' check {elem}"
+                )
+
+        os.system(
+            f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'"
+        )
 
         # CODESPELL
-        #LOG.info("Codespell")
-        subprocess.check_output(""" codespell "evadb/*.py" """, 
-                shell=True, 
-                universal_newlines=True)
-        subprocess.check_output(""" codespell "evadb/*/*.py" """, 
-                shell=True, 
-                universal_newlines=True)
-        subprocess.check_output(""" codespell "docs/source/*/*.rst" """, 
-                shell=True, 
-                universal_newlines=True)
-        subprocess.check_output(""" codespell "docs/source/*.rst" """, 
-                shell=True, 
-                universal_newlines=True)
-        subprocess.check_output(""" codespell "*.md" """, 
-                shell=True, 
-                universal_newlines=True)
-        subprocess.check_output(""" codespell "evadb/*.md" """, 
-                shell=True, 
-                universal_newlines=True)
+        # LOG.info("Codespell")
+        subprocess.check_output(
+            """ codespell "evadb/*.py" """, shell=True, universal_newlines=True
+        )
+        subprocess.check_output(
+            """ codespell "evadb/*/*.py" """, shell=True, universal_newlines=True
+        )
+        subprocess.check_output(
+            """ codespell "docs/source/*/*.rst" """, shell=True, universal_newlines=True
+        )
+        subprocess.check_output(
+            """ codespell "docs/source/*.rst" """, shell=True, universal_newlines=True
+        )
+        subprocess.check_output(
+            """ codespell "*.md" """, shell=True, universal_newlines=True
+        )
+        subprocess.check_output(
+            """ codespell "evadb/*.md" """, shell=True, universal_newlines=True
+        )
 
-        for elem in Path(EvaDB_SRC_DIR).rglob('*.*'):
+        for elem in Path(EvaDB_SRC_DIR).rglob("*.*"):
             if elem.suffix == ".py":
-                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+                os.system(
+                    f"aspell --lang=en --personal='{ignored_words_file}' check {elem}"
+                )
 
-        for elem in Path(EvaDB_TEST_DIR).rglob('*.*'):
+        for elem in Path(EvaDB_TEST_DIR).rglob("*.*"):
             if elem.suffix == ".py":
-                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+                os.system(
+                    f"aspell --lang=en --personal='{ignored_words_file}' check {elem}"
+                )

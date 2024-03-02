@@ -1306,9 +1306,7 @@ class LogicalVectorIndexScanToPhysical(Rule):
         yield after
 
 
-"""
-Rules to optimize Ray.
-"""
+# == Rules to optimize Ray. ==
 
 
 def get_ray_env_dict():

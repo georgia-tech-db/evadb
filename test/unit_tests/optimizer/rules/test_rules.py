@@ -214,9 +214,11 @@ class RulesTest(unittest.TestCase):
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
             LogicalGetToSeqScan(),
-            LogicalProjectToRayPhysical()
-            if ray_enabled_and_installed
-            else LogicalProjectToPhysical(),
+            (
+                LogicalProjectToRayPhysical()
+                if ray_enabled_and_installed
+                else LogicalProjectToPhysical()
+            ),
             LogicalProjectNoTableToPhysical(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
@@ -228,9 +230,11 @@ class RulesTest(unittest.TestCase):
             LogicalFunctionScanToPhysical(),
             LogicalJoinToPhysicalHashJoin(),
             LogicalFilterToPhysical(),
-            LogicalApplyAndMergeToRayPhysical()
-            if ray_enabled_and_installed
-            else LogicalApplyAndMergeToPhysical(),
+            (
+                LogicalApplyAndMergeToRayPhysical()
+                if ray_enabled_and_installed
+                else LogicalApplyAndMergeToPhysical()
+            ),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),

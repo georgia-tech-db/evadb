@@ -20,9 +20,8 @@ from signal import SIGTERM
 
 from psutil import process_iter
 
-"""
-To allow running evadb_server from any location
-"""
+# == To allow running evadb_server from any location ==
+
 THIS_DIR = dirname(__file__)
 EvaDB_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EvaDB_CODE_DIR)

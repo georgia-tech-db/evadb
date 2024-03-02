@@ -45,7 +45,7 @@ VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirements = [
     "numpy>=1.19.5",
-    "pandas>=2.1.0", # DataFrame.map is available after v2.1.0
+    "pandas>=2.1.0",  # DataFrame.map is available after v2.1.0
     "sqlalchemy>=2.0.0",
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
@@ -134,9 +134,7 @@ forecasting_libs = [
     "neuralforecast",  # MODEL TRAIN AND FINE TUNING
 ]
 
-imagegen_libs = [
-    "replicate"
-]
+imagegen_libs = ["replicate"]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
@@ -184,7 +182,15 @@ EXTRA_REQUIRES = {
     "forecasting": forecasting_libs,
     "hackernews": hackernews_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
-    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs + imagegen_libs + xgboost_libs
+    "dev": dev_libs
+    + vision_libs
+    + document_libs
+    + function_libs
+    + notebook_libs
+    + forecasting_libs
+    + sklearn_libs
+    + imagegen_libs
+    + xgboost_libs,
 }
 
 setup(

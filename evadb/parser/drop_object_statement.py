@@ -17,7 +17,6 @@ from evadb.parser.types import ObjectType, StatementType
 
 
 class DropObjectStatement(AbstractStatement):
-
     """Drop Object Statement constructed after parsing the input query
 
     Attributes:

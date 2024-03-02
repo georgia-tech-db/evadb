@@ -153,9 +153,11 @@ class ChatGPT(AbstractFunction):
 
             def_sys_prompt_message = {
                 "role": "system",
-                "content": prompt
-                if prompt is not None
-                else "You are a helpful assistant that accomplishes user tasks.",
+                "content": (
+                    prompt
+                    if prompt is not None
+                    else "You are a helpful assistant that accomplishes user tasks."
+                ),
             }
 
             params["messages"].append(def_sys_prompt_message)

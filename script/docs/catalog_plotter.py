@@ -232,9 +232,7 @@ def _render_table_html(
         suffix = (
             "(FK)"
             if col.name in fk_col_names
-            else "(PK)"
-            if col.name in pk_col_names
-            else ""
+            else "(PK)" if col.name in pk_col_names else ""
         )
         if show_datatypes:
             return "- %s : %s" % (col.name + suffix, format_col_type(col))
@@ -248,9 +246,11 @@ def _render_table_html(
             return '<FONT COLOR="{color}" POINT-SIZE="{size}">{bld}{it}{name}{e_it}{e_bld}</FONT>'.format(
                 name=obj_name,
                 color=format_dict.get("color") if "color" in format_dict else "initial",
-                size=float(format_dict["fontsize"])
-                if "fontsize" in format_dict
-                else "initial",
+                size=(
+                    float(format_dict["fontsize"])
+                    if "fontsize" in format_dict
+                    else "initial"
+                ),
                 it="<I>" if format_dict.get("italics") else "",
                 e_it="</I>" if format_dict.get("italics") else "",
                 bld="<B>" if format_dict.get("bold") else "",
