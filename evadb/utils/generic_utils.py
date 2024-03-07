@@ -518,6 +518,16 @@ def try_to_import_openai():
         )
 
 
+def try_to_import_gemini():
+    try:
+        import google.generativeai as genai  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import openai python package.
+                Please install them with `pip install google-generativeai`."""
+        )
+
+
 def try_to_import_langchain():
     try:
         import langchain  # noqa: F401
