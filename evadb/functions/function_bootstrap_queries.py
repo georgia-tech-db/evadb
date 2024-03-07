@@ -197,6 +197,12 @@ chatgpt_function_query = """CREATE FUNCTION IF NOT EXISTS ChatGPT
     EvaDB_INSTALLATION_DIR
 )
 
+gemini_function_query = """CREATE FUNCTION IF NOT EXISTS Gemini
+        IMPL '{}/functions/gemini.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
 yolo8n_query = """CREATE FUNCTION IF NOT EXISTS Yolo
             TYPE  ultralytics
             MODEL 'yolov8n.pt';
@@ -282,6 +288,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         Similarity_function_query,
         norfair_obj_tracker_query,
         chatgpt_function_query,
+        gemini_function_query,
         face_detection_function_query,
         # Mvit_function_query,
         Sift_function_query,

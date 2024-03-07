@@ -81,6 +81,7 @@ document_libs = [
     "protobuf",
     "bs4",
     "openai>=1.0",  # CHATGPT
+    "google-generativeai", #GEMINI
     "gpt4all",  # PRIVATE GPT
     "sentencepiece",  # TRANSFORMERS
 ]
